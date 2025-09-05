@@ -1,0 +1,82 @@
+import { Condition } from "fhir/r4";
+
+export function generateCamorbidities(
+  comorbidities: {
+    trg_source_system_name: string;
+    trg_row_ice_id: string;
+    onset_date_string: string;
+    comorbidity_system: string;
+    comorbidity_class_name: string;
+    comorbidity_status_code: string;
+    comorbidity_class_system: string;
+    comorbidity_class_code: string;
+    comorbidity_status_name: string;
+    comorbidity_code: string;
+    comorbidity_name: string;
+    comorbidity_status_system: string;
+    comorbidity_concept_map: string;
+    comorbidity_class_concept_map: string;
+    comorbidity_status_concept_map: string;
+  },
+  patientUrl: string
+) {
+  return <Condition>{
+    resourceType: "Condition",
+    identifier: [
+      {
+        system: comorbidities.trg_source_system_name,
+        value: comorbidities.trg_row_ice_id,
+      },
+    ],
+    onsetDateTime: comorbidities.onset_date_string,
+    code: {
+      coding: [
+        {
+          system: comorbidities.comorbidity_system,
+          code: comorbidities.comorbidity_code,
+          display: comorbidities.comorbidity_name,
+        },
+      ],
+    },
+    category: [
+      {
+        text: comorbidities.comorbidity_class_name,
+        coding: [
+          {
+            system: comorbidities.comorbidity_class_system,
+            code: comorbidities.comorbidity_class_code,
+            display: comorbidities.comorbidity_class_name,
+          },
+        ],
+      },
+    ],
+    clinicalStatus: {
+      coding: [
+        {
+          system: comorbidities.comorbidity_status_system,
+          code: comorbidities.comorbidity_status_code,
+          display: comorbidities.comorbidity_status_name,
+        },
+      ],
+    },
+    subject: {
+      reference: patientUrl,
+    },
+    meta: {
+      tag: [
+        {
+          system: "comorbidity_concept_map",
+          code: comorbidities.comorbidity_concept_map,
+        },
+        {
+          system: "comorbidity_class_concept_map",
+          code: comorbidities.comorbidity_class_concept_map,
+        },
+        {
+          system: "comorbidity_status_concept_map",
+          code: comorbidities.comorbidity_status_concept_map,
+        },
+      ],
+    },
+  };
+}

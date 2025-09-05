@@ -1,0 +1,25 @@
+{
+  "name": "david",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "start.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "npx tsx --tsconfig tsconfig.json start.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@types/fhir": "^0.0.41",
+    "fhir": "^4.12.0",
+    "jszip": "^3.10.1",
+    "node-fetch": "^3.3.2",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "ts-node": "^10.9.2"
+  }
+}
