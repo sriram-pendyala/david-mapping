@@ -9,6 +9,8 @@ import { generateCamorbidities } from "./mappers/Comorbidities";
 import { generateEncounterSchedule } from "./mappers/EncounterSchedule";
 import { generateEncounters } from "./mappers/Encounters";
 import { generateFamilyMemberHistories } from "./mappers/FamilyMemberHistories";
+import { generateImagingDiagnostics } from "./mappers/Imaging";
+import { generatePatientLab } from "./mappers/Labs";
 
 async function processFile() {
   const { filepath, filename, icdCodes } = workerData;
@@ -160,6 +162,53 @@ function processJsonFile(content: string, filename: string, codes: any[]) {
   if (bundle && familyMembers.length > 0) {
     bundle.entry?.push(...familyMembers);
   }
+
+  // Insert imagings DIAGNOSTICS
+  const imagings = ((data.clinical_domain.imagings as any[]) || [])
+    .map((imaging) => generateImagingDiagnostics(imaging, patientUrl))
+    .map((imaging) => ({
+      fullUrl: `urn:uuid:${uuid.v4()}`,
+      request: {
+        method: "POST" as any,
+        url: "DiagnosticReport",
+      },
+      resource: imaging,
+    }));
+
+  if (bundle && imagings.length > 0) {
+    bundle.entry?.push(...imagings);
+  }
+
+  // Insert Labs
+  const labsDetails = ((data.clinical_domain.labs as any[]) || [])
+    .map((lab) => generatePatientLab(lab, patientUrl))
+    .map(({ labObservation, labReport }) => {
+      const observationId = `urn:uuid:${uuid.v4()}`;
+      return [
+        {
+          fullUrl: observationId,
+          request: {
+            method: "POST" as any,
+            url: "Observation",
+          },
+          resource: labObservation,
+        },
+        {
+          fullUrl: `urn:uuid:${uuid.v4()}`,
+          request: {
+            method: "POST" as any,
+            url: "DiagnosticReport",
+          },
+          resource: {
+            ...labReport,
+            result: [{ reference: observationId }],
+          },
+        },
+      ];
+    })
+    .flat();
+
+  if (bundle && labsDetails.length > 0) bundle.entry?.push(...labsDetails);
 
   return bundle;
 }

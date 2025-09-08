@@ -2,6 +2,7 @@ import { loadCodes } from "./load_codes.js";
 import { Worker } from "worker_threads";
 import fs from "fs/promises";
 import path from "path";
+import clipboardy from "clipboardy";
 
 async function generatePatientBundles() {
   const codes = await loadCodes();
@@ -44,10 +45,11 @@ async function generatePatientBundles() {
   try {
     const results = await Promise.all(workers);
     console.log("All files processed successfully");
-    results.forEach((res) => {
-      console.log(`Results: `);
-      console.log(JSON.stringify(res));
-    });
+    clipboardy.writeSync(JSON.stringify(results, null, 2));
+    // results.forEach((res) => {
+    //   console.log(`Results: `);
+    //   console.log(JSON.stringify(res));
+    // });
     return results;
   } catch (error) {
     console.error("Error processing files:", error);
