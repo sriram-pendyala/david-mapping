@@ -24,13 +24,15 @@ export function generateImagingDiagnostics(
     code: {
       coding: [
         {
-          system: resource.imaging_system,
-          code: resource.imaging_code,
+          system: resource.imaging_system || "N/A",
+          code: resource.imaging_code || "N/A",
           display: resource.imaging_name,
         },
       ],
     },
-    effectiveDateTime: resource.performed_date_string,
+    ...(resource.performed_date_string && {
+      effectiveDateTime: new Date(resource.performed_date_string).toISOString(),
+    }),
     subject: {
       reference: patientUrl,
     },
@@ -38,7 +40,7 @@ export function generateImagingDiagnostics(
       tag: [
         {
           system: "imaging_concept_map",
-          code: resource.imaging_concept_map,
+          code: resource.imaging_concept_map || "N/A",
         },
       ],
     },

@@ -29,11 +29,11 @@ export function generateFamilyMemberHistories(
       tag: [
         {
           system: "family_member_history_type_concept_map",
-          code: members.family_member_history_type_concept_map,
+          code: members.family_member_history_type_concept_map || "N/A",
         },
         {
           system: "family_member_history_condition_concept_map",
-          code: members.family_member_history_condition_concept_map,
+          code: members.family_member_history_condition_concept_map || "N/A",
         },
       ],
     },
@@ -46,8 +46,8 @@ export function generateFamilyMemberHistories(
     relationship: {
       coding: [
         {
-          system: members.family_member_history_type_system,
-          code: members.family_member_history_type_code,
+          system: members.family_member_history_type_system || "N/A",
+          code: members.family_member_history_type_code || "N/A",
           display: members.family_member_history_type_name,
         },
       ],
@@ -58,8 +58,8 @@ export function generateFamilyMemberHistories(
         code: {
           coding: [
             {
-              system: members.family_member_history_condition_system,
-              code: members.family_member_history_condition_code,
+              system: members.family_member_history_condition_system || "N/A",
+              code: members.family_member_history_condition_code || "N/A",
               display: members.family_member_history_condition_name,
             },
           ],

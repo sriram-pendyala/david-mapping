@@ -46,6 +46,7 @@ async function generatePatientBundles() {
     const results = await Promise.all(workers);
     console.log("All files processed successfully");
     clipboardy.writeSync(JSON.stringify(results, null, 2));
+    console.log("copy complete");
     // results.forEach((res) => {
     //   console.log(`Results: `);
     //   console.log(JSON.stringify(res));

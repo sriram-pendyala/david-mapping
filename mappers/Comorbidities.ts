@@ -32,8 +32,8 @@ export function generateCamorbidities(
     code: {
       coding: [
         {
-          system: comorbidities.comorbidity_system,
-          code: comorbidities.comorbidity_code,
+          system: comorbidities.comorbidity_system || "N/A",
+          code: comorbidities.comorbidity_code || "N/A",
           display: comorbidities.comorbidity_name,
         },
       ],
@@ -43,8 +43,8 @@ export function generateCamorbidities(
         text: comorbidities.comorbidity_class_name,
         coding: [
           {
-            system: comorbidities.comorbidity_class_system,
-            code: comorbidities.comorbidity_class_code,
+            system: comorbidities.comorbidity_class_system || "N/A",
+            code: comorbidities.comorbidity_class_code || "N/A",
             display: comorbidities.comorbidity_class_name,
           },
         ],
@@ -53,8 +53,8 @@ export function generateCamorbidities(
     clinicalStatus: {
       coding: [
         {
-          system: comorbidities.comorbidity_status_system,
-          code: comorbidities.comorbidity_status_code,
+          system: comorbidities.comorbidity_status_system || "N/A",
+          code: comorbidities.comorbidity_status_code || "N/A",
           display: comorbidities.comorbidity_status_name,
         },
       ],
@@ -66,15 +66,15 @@ export function generateCamorbidities(
       tag: [
         {
           system: "comorbidity_concept_map",
-          code: comorbidities.comorbidity_concept_map,
+          code: comorbidities.comorbidity_concept_map || "N/A",
         },
         {
           system: "comorbidity_class_concept_map",
-          code: comorbidities.comorbidity_class_concept_map,
+          code: comorbidities.comorbidity_class_concept_map || "N/A",
         },
         {
           system: "comorbidity_status_concept_map",
-          code: comorbidities.comorbidity_status_concept_map,
+          code: comorbidities.comorbidity_status_concept_map || "N/A",
         },
       ],
     },

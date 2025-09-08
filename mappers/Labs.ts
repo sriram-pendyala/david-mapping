@@ -31,27 +31,29 @@ export function generatePatientLab(
         value: details.trg_row_ice_id,
       },
     ],
-    effectiveDateTime: details.effective_date_string,
+    ...(details.effective_date_string && {
+      effectiveDateTime: new Date(details.effective_date_string).toISOString(),
+    }),
     meta: {
       tag: [
         {
           system: "lab_type_concept_map",
-          code: details.lab_type_concept_map,
+          code: details.lab_type_concept_map || "N/A",
         },
         {
           system: "quantity_unit_concept_map",
-          code: details.quantity_unit_concept_map,
+          code: details.quantity_unit_concept_map || "N/A",
         },
         {
           system: "lab_value_concept_map",
-          code: details.lab_value_concept_map,
+          code: details.lab_value_concept_map || "N/A",
         },
       ],
     },
     ...(details.lab_value_quantity && {
       valueQuantity: {
-        system: details.quantity_unit_system,
-        code: details.quantity_unit_code,
+        system: details.quantity_unit_system || "N/A",
+        code: details.quantity_unit_code || "N/A",
         unit: details.quantity_unit_name,
         value: Number(details.lab_value_quantity),
         comparator: details.quantity_comparator as any,
@@ -62,8 +64,8 @@ export function generatePatientLab(
         coding: [
           {
             display: details.lab_value_name,
-            code: details.lab_value_code,
-            system: details.lab_type_system,
+            code: details.lab_value_code || "N/A",
+            system: details.lab_type_system || "N/A",
           },
         ],
       },
@@ -72,8 +74,8 @@ export function generatePatientLab(
       coding: [
         {
           system: details.lab_type_system,
-          code: details.lab_type_code,
-          display: details.lab_type_name,
+          code: details.lab_type_code || "N/A",
+          display: details.lab_type_name || "N/A",
         },
       ],
     },
@@ -103,8 +105,8 @@ export function generatePatientLab(
       {
         coding: [
           {
-            system: details.lab_type_system,
-            code: details.lab_type_code,
+            system: details.lab_type_system || "N/A",
+            code: details.lab_type_code || "N/A",
             display: details.lab_type_name,
           },
         ],
@@ -114,8 +116,8 @@ export function generatePatientLab(
     code: {
       coding: [
         {
-          system: details.lab_type_system,
-          code: details.lab_type_code,
+          system: details.lab_type_system || "N/A",
+          code: details.lab_type_code || "N/A",
           display: details.lab_type_name,
         },
       ],
@@ -123,8 +125,12 @@ export function generatePatientLab(
     subject: {
       reference: patientUrl,
     },
-    effectiveDateTime: details.effective_date_string,
-    issued: details.effective_date_string,
+    ...(details.effective_date_string && {
+      effectiveDateTime: new Date(details.effective_date_string).toISOString(),
+    }),
+    ...(details.effective_date_string && {
+      issued: new Date(details.effective_date_string).toISOString(),
+    }),
     result: [
       {
         reference: `Observation/observation-${details.trg_row_ice_id}`,

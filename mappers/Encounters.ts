@@ -19,11 +19,16 @@ export function generateEncounters(
         value: encounter.trg_row_ice_id,
       },
     ],
+    class: {
+      system: encounter.encounter_system || "N/A",
+      code: encounter.encounter_code || "N/A",
+      display: encounter.encounter_name,
+    },
     meta: {
       tag: [
         {
           system: "encounter_concept_map",
-          code: encounter.encounter_concept_map,
+          code: encounter.encounter_concept_map || "N/A",
         },
       ],
     },
@@ -32,8 +37,8 @@ export function generateEncounters(
       {
         coding: [
           {
-            system: encounter.encounter_system,
-            code: encounter.encounter_code,
+            system: encounter.encounter_system || "N/A",
+            code: encounter.encounter_code || "N/A",
             display: encounter.encounter_name,
           },
         ],

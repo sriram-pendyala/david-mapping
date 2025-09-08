@@ -23,12 +23,7 @@ async function processFile() {
     const result = processJsonFile(content, filename, icdCodes);
 
     // Send result back to main thread
-    parentPort?.postMessage({
-      filename,
-      success: true,
-      data: result,
-      processedAt: new Date().toISOString(),
-    });
+    parentPort?.postMessage(result);
   } catch (error) {
     parentPort?.postMessage({
       filename,

@@ -35,47 +35,54 @@ export function generateAssessment(
         coding: [
           {
             display: assessment.assessment_value_name,
-            code: assessment.assessment_value_code,
-            system: assessment.assessment_value_system,
+            code: assessment.assessment_value_code || "N/A",
+            system: assessment.assessment_value_system || "N/A",
           },
         ],
       },
     }),
     ...(assessment.assessment_value_quantity && {
       valueQuantity: {
-        system: assessment.quantity_unit_system,
-        code: assessment.quantity_unit_code,
+        system: assessment.quantity_unit_system || "N/A",
+        code: assessment.quantity_unit_code || "N/A",
         unit: assessment.quantity_unit_name,
-        value: assessment.assessment_value_quantity,
+        value: Number(assessment.assessment_value_quantity),
       },
     }),
     code: {
       coding: [
         {
-          system: assessment.assessment_type_system,
-          code: assessment.assessment_type_code,
+          system: assessment.assessment_type_system || "N/A",
+          code: assessment.assessment_type_code || "N/A",
           display: assessment.assessment_type_name,
         },
       ],
     },
-    issued: assessment.assessment_date,
-    effectiveDateTime: assessment.effective_date_string,
+    ...(assessment.assessment_date && {
+      issued: new Date(assessment.assessment_date).toISOString(),
+    }),
+    ...(assessment.effective_date_string && {
+      effectiveDateTime: new Date(
+        assessment.effective_date_string
+      ).toISOString(),
+    }),
     subject: {
       reference: patientUrl,
     },
+    status: "unknown",
     meta: {
       tag: [
         {
           system: "quantity_unit_concept_map",
-          code: assessment.quantity_unit_concept_map,
+          code: assessment.quantity_unit_concept_map || "N/A",
         },
         {
           system: "assessment_value_concept_map",
-          code: assessment.assessment_value_concept_map,
+          code: assessment.assessment_value_concept_map || "N/A",
         },
         {
           system: "assessment_type_concept_map",
-          code: assessment.assessment_type_concept_map,
+          code: assessment.assessment_type_concept_map || "N/A",
         },
       ],
     },

@@ -36,19 +36,25 @@ export function generateEncounterSchedule(
         },
       ],
     },
-    status: encounter_schedules.schedule_status_code as
-      | "proposed"
-      | "pending"
-      | "booked"
-      | "arrived"
-      | "fulfilled"
-      | "cancelled"
-      | "noshow"
-      | "entered-in-error"
-      | "checked-in"
-      | "waitlist",
+    status: [
+      "proposed",
+      "pending",
+      "booked",
+      "arrived",
+      "fulfilled",
+      "cancelled",
+      "noshow",
+      "entered-in-error",
+      "checked-in",
+      "waitlist",
+    ].includes(encounter_schedules.schedule_status_name.toLowerCase())
+      ? encounter_schedules.schedule_status_name.toLowerCase()
+      : "proposed",
     description: encounter_schedules.schedule_name,
-    start: encounter_schedules.effective_date_string,
+    ...(encounter_schedules.effective_date_string && {
+      start: new Date(encounter_schedules.effective_date_string).toISOString(),
+      end: new Date(encounter_schedules.effective_date_string).toISOString(),
+    }),
     participant: [
       {
         actor: {
@@ -62,8 +68,8 @@ export function generateEncounterSchedule(
       {
         coding: [
           {
-            system: encounter_schedules.schedule_system,
-            code: encounter_schedules.schedule_code,
+            system: encounter_schedules.schedule_system || "N/A",
+            code: encounter_schedules.schedule_code || "N/A",
             display: encounter_schedules.schedule_name,
           },
         ],

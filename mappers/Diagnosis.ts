@@ -34,8 +34,8 @@ export function generateDiagnosis(
     code: {
       coding: [
         {
-          system: diagnosisData.diagnosis_system,
-          code: diagnosisData.diagnosis_code,
+          system: diagnosisData.diagnosis_system || "N/A",
+          code: diagnosisData.diagnosis_code || "N/A",
           display: diagnosisData.diagnosis_name,
         },
       ],
@@ -50,8 +50,8 @@ export function generateDiagnosis(
       {
         coding: [
           {
-            system: diagnosisData.diagnosis_class_system,
-            code: diagnosisData.diagnosis_class_code,
+            system: diagnosisData.diagnosis_class_system || "N/A",
+            code: diagnosisData.diagnosis_class_code || "N/A",
           },
         ],
         text: diagnosisData.diagnosis_class_name,
@@ -61,15 +61,15 @@ export function generateDiagnosis(
       tag: [
         {
           system: "diagnosis_concept_map",
-          code: diagnosisData.diagnosis_concept_map,
+          code: diagnosisData.diagnosis_concept_map || "N/A",
         },
         {
           system: "diagnosis_status_concept_map",
-          code: diagnosisData.diagnosis_status_concept_map,
+          code: diagnosisData.diagnosis_status_concept_map || "N/A",
         },
         {
           system: "diagnosis_class_concept_map",
-          code: diagnosisData.diagnosis_class_concept_map,
+          code: diagnosisData.diagnosis_class_concept_map || "N/A",
         },
       ],
     },

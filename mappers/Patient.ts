@@ -40,15 +40,15 @@ export function generatePatient(demographics: {
       tag: [
         {
           system: "gender_concept_map",
-          code: demographics.gender_concept_map,
+          code: demographics.gender_concept_map || "N/A",
         },
         {
           system: "ethnicity_concept_map",
-          code: demographics.ethnicity_concept_map,
+          code: demographics.ethnicity_concept_map || "N/A",
         },
         {
           system: "race_concept_map",
-          code: demographics.race_concept_map,
+          code: demographics.race_concept_map || "N/A",
         },
       ],
     },
@@ -56,24 +56,24 @@ export function generatePatient(demographics: {
       {
         url: "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
         valueCoding: {
-          system: demographics.gender_system,
-          code: demographics.gender_code,
+          system: demographics.gender_system || "N/A",
+          code: demographics.gender_code || "N/A",
           display: demographics.gender_name,
         },
       },
       {
         url: "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
         valueCoding: {
-          system: demographics.race_system,
-          code: demographics.race_code,
+          system: demographics.race_system || "N/A",
+          code: demographics.race_code || "N/A",
           display: demographics.race_name,
         },
       },
       {
         url: "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethinicity",
         valueCoding: {
-          system: demographics.ethnicity_system,
-          code: demographics.ethnicity_code,
+          system: demographics.ethnicity_system || "N/A",
+          code: demographics.ethnicity_code || "N/A",
           display: demographics.ethnicity_name,
         },
       },
@@ -85,7 +85,9 @@ export function generatePatient(demographics: {
       },
     ],
     birthDate: demographics.date_of_birth_string,
-    deceasedDateTime: demographics.date_of_death_string,
+    ...(demographics.date_of_death_string && {
+      deceasedDateTime: demographics.date_of_death_string,
+    }),
     deceasedBoolean: !!demographics.deceased,
     name: [
       {
