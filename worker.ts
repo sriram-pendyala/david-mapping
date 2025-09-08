@@ -11,6 +11,7 @@ import { generateEncounters } from "./mappers/Encounters";
 import { generateFamilyMemberHistories } from "./mappers/FamilyMemberHistories";
 import { generateImagingDiagnostics } from "./mappers/Imaging";
 import { generatePatientLab } from "./mappers/Labs";
+import { generatePatientMedications } from "./mappers/Medication";
 
 async function processFile() {
   const { filepath, filename, icdCodes } = workerData;
@@ -204,6 +205,23 @@ function processJsonFile(content: string, filename: string, codes: any[]) {
     .flat();
 
   if (bundle && labsDetails.length > 0) bundle.entry?.push(...labsDetails);
+
+  // Insert medications
+
+  const medications = ((data.clinical_domain.medications as any[]) || [])
+    .map((med) => generatePatientMedications(med, patientUrl))
+    .map((medication) => ({
+      fullUrl: `urn:uuid:${uuid.v4()}`,
+      request: {
+        method: "POST" as any,
+        url: medication.resourceType,
+      },
+      resource: medication,
+    }));
+
+  if (bundle && medications.length > 0) {
+    bundle.entry?.push(...medications);
+  }
 
   return bundle;
 }
