@@ -12,6 +12,8 @@ import { generateFamilyMemberHistories } from "./mappers/FamilyMemberHistories";
 import { generateImagingDiagnostics } from "./mappers/Imaging";
 import { generatePatientLab } from "./mappers/Labs";
 import { generatePatientMedications } from "./mappers/Medication";
+import { generateProcedure } from "./mappers/Procedure";
+import { generatePatientVitals } from "./mappers/Vitals";
 
 async function processFile() {
   const { filepath, filename, icdCodes } = workerData;
@@ -222,6 +224,80 @@ function processJsonFile(content: string, filename: string, codes: any[]) {
   if (bundle && medications.length > 0) {
     bundle.entry?.push(...medications);
   }
+
+  // Insert other diagnosis
+  const otherDiagnoses = ((data.clinical_domain.other_diagnoses as any[]) || [])
+    .map((diagnosis) =>
+      generateDiagnosis(
+        codes,
+        {
+          trg_source_system_name: diagnosis.trg_source_system_name,
+          trg_row_ice_id: diagnosis.trg_row_ice_id,
+          diagnosis_system: diagnosis.other_diagnosis_system || "N/A",
+          diagnosis_code: diagnosis.other_diagnosis_code || "N/A",
+          diagnosis_id: diagnosis.diagnosis_id || "N/A",
+          diagnosis_status_code: diagnosis.other_diagnosis_status_code,
+          diagnosis_status_system: diagnosis.other_diagnosis_status_system,
+          onset_date_string: diagnosis.onset_date_string,
+          diagnosis_status_name: diagnosis.other_diagnosis_status_name,
+          diagnosis_class_system: diagnosis.other_diagnosis_class_system,
+          diagnosis_name: diagnosis.other_diagnosis_name,
+          diagnosis_class_code: diagnosis.other_diagnosis_class_code,
+          diagnosis_class_name: diagnosis.other_diagnosis_class_name,
+          diagnosis_concept_map: diagnosis.other_diagnosis_concept_map,
+          diagnosis_status_concept_map:
+            diagnosis.other_diagnosis_status_concept_map,
+          diagnosis_class_concept_map:
+            diagnosis.other_diagnosis_class_concept_map,
+        },
+        patientUrl
+      )
+    )
+    .map((diag) => ({
+      fullUrl: `urn:uuid:${uuid.v4()}`,
+      request: {
+        method: "POST" as any,
+        url: "Condition",
+      },
+      resource: diag,
+    }));
+
+  if (bundle && otherDiagnoses.length > 0) {
+    bundle.entry?.push(...otherDiagnoses);
+  }
+
+  //Insert Procedures
+  const procedures = ((data.clinical_domain.other_procedures as any[]) || [])
+    .map((procedure) => generateProcedure(codes, procedure, patientUrl))
+    .map((proc) => ({
+      fullUrl: `urn:uuid:${uuid.v4()}`,
+      request: {
+        method: "POST" as any,
+        url: "Procedure",
+      },
+      resource: proc,
+    }));
+
+  if (bundle && procedures.length > 0) {
+    bundle.entry?.push(...procedures);
+  }
+
+  // Insert Vitals
+  const vitals = ((data.clinical_domain.vitals as any[]) || [])
+    .map((vital) => generatePatientVitals(vital, patientUrl))
+    .map((observation) => {
+      const observationId = `urn:uuid:${uuid.v4()}`;
+      return {
+        fullUrl: observationId,
+        request: {
+          method: "POST" as any,
+          url: "Observation",
+        },
+        resource: observation,
+      };
+    });
+
+  if (bundle && vitals.length > 0) bundle.entry?.push(...vitals);
 
   return bundle;
 }
