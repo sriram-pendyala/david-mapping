@@ -299,6 +299,36 @@ function processJsonFile(content: string, filename: string, codes: any[]) {
 
   if (bundle && vitals.length > 0) bundle.entry?.push(...vitals);
 
+  // Insert surgeries
+  const surgeries = ((data.clinical_domain.surgeries as any[]) || [])
+    .map((surgery) =>
+      generateProcedure(
+        codes,
+        {
+          trg_source_system_name: surgery.trg_source_system_name,
+          trg_row_ice_id: surgery.trg_row_ice_id,
+          other_procedure_code: surgery.surgery_code || "N/A",
+          other_procedure_name: surgery.surgery_name || "N/A",
+          other_procedure_system: surgery.surgery_system || "N/A",
+          performed_date_string: surgery.performed_date_string,
+          other_procedure_concept_map: surgery.surgery_concept_map || "N/A",
+        },
+        patientUrl
+      )
+    )
+    .map((surgery) => ({
+      fullUrl: `urn:uuid:${uuid.v4()}`,
+      request: {
+        method: "POST" as any,
+        url: "Procedure",
+      },
+      resource: surgery,
+    }));
+
+  if (bundle && surgeries.length > 0) {
+    bundle.entry?.push(...surgeries);
+  }
+
   return bundle;
 }
 processFile();
