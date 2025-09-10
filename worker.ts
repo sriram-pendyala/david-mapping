@@ -14,6 +14,7 @@ import { generatePatientLab } from "./mappers/Labs";
 import { generatePatientMedications } from "./mappers/Medication";
 import { generateProcedure } from "./mappers/Procedure";
 import { generatePatientVitals } from "./mappers/Vitals";
+import { generatePatientMolecularSequencing } from "./mappers/MolecularSequencing";
 
 async function processFile() {
   const { filepath, filename, icdCodes } = workerData;
@@ -327,6 +328,37 @@ function processJsonFile(content: string, filename: string, codes: any[]) {
 
   if (bundle && surgeries.length > 0) {
     bundle.entry?.push(...surgeries);
+  }
+
+  // Insert Molecular Sequencing
+  const molecularSequencings = (
+    (data.clinical_domain.molecular_sequencings as any[]) || []
+  )
+    .map((molecular) =>
+      generatePatientMolecularSequencing(molecular, patientUrl)
+    )
+    .map(({ molecularSequence, observation }) => [
+      {
+        fullUrl: `urn:uuid:${molecularSequence.id}`,
+        request: {
+          method: "POST" as any,
+          url: "MolecularSequence",
+        },
+        resource: molecularSequence,
+      },
+      {
+        fullUrl: `urn:uuid:${observation.id}`,
+        request: {
+          method: "POST" as any,
+          url: "Observation",
+        },
+        resource: observation,
+      },
+    ])
+    .flat();
+
+  if (bundle && molecularSequencings.length > 0) {
+    bundle.entry?.push(...molecularSequencings);
   }
 
   return bundle;
