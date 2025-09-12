@@ -15,6 +15,7 @@ import { generatePatientMedications } from "./mappers/Medication";
 import { generateProcedure } from "./mappers/Procedure";
 import { generatePatientVitals } from "./mappers/Vitals";
 import { generatePatientMolecularSequencing } from "./mappers/MolecularSequencing";
+import { generatePatientRadioTherapies } from "./mappers/RadioTherapies";
 
 async function processFile() {
   const { filepath, filename, icdCodes } = workerData;
@@ -356,6 +357,22 @@ function processJsonFile(content: string, filename: string, codes: any[]) {
       },
     ])
     .flat();
+
+  // Insert Radio Therapies
+  const radioTherapies = ((data.clinical_domain.radiotherapies as any[]) || [])
+    .map((radio) => generatePatientRadioTherapies(radio, patientUrl))
+    .map((radio) => ({
+      fullUrl: `urn:uuid:${uuid.v4()}`,
+      request: {
+        method: "POST" as any,
+        url: "Procedure",
+      },
+      resource: radio,
+    }));
+
+  if (bundle && radioTherapies.length > 0) {
+    bundle.entry?.push(...radioTherapies);
+  }
 
   if (bundle && molecularSequencings.length > 0) {
     bundle.entry?.push(...molecularSequencings);
