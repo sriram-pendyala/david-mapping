@@ -149,4 +149,6 @@ export function generatePatientRadioTherapies(
       ],
     },
   };
+
+  return procedure;
 }
