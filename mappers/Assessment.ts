@@ -24,12 +24,14 @@ export function generateAssessment(
 ) {
   return <Observation>{
     resourceType: "Observation",
-    identifier: [
-      {
-        system: assessment.trg_source_system_name,
-        value: assessment.trg_row_ice_id,
-      },
-    ],
+    ...(assessment.trg_row_ice_id && {
+      identifier: [
+        {
+          system: assessment.trg_source_system_name,
+          value: assessment.trg_row_ice_id,
+        },
+      ],
+    }),
     ...(!assessment.assessment_value_quantity && {
       valueCodeableConcept: {
         coding: [

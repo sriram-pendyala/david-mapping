@@ -22,12 +22,14 @@ export function generatePatientVitals(
 ) {
   return <Observation>{
     resourceType: "Observation",
-    identifier: [
-      {
-        system: details.trg_source_system_name,
-        value: details.trg_row_ice_id,
-      },
-    ],
+    ...(details.trg_row_ice_id && {
+      identifier: [
+        {
+          system: details.trg_source_system_name,
+          value: details.trg_row_ice_id,
+        },
+      ],
+    }),
     status: "final",
     ...(details.effective_date_string && {
       effectiveDateTime: details.effective_date_string,

@@ -25,18 +25,20 @@ export function generatePatientMedications(
   patientUrl: string
 ) {
   if (
-    ["medicationordered", "medicationprescribed", ""].includes(
+    ["medicationordered", "medicationprescribed", "medicationrequest"].includes(
       details.ordered_administered_flag.toLowerCase()
     )
   ) {
     return <MedicationRequest>{
       resourceType: "MedicationRequest",
-      identifier: [
-        {
-          system: details.trg_source_system_name,
-          value: details.trg_row_ice_id,
-        },
-      ],
+      ...(details.trg_row_ice_id && {
+        identifier: [
+          {
+            system: details.trg_source_system_name,
+            value: details.trg_row_ice_id,
+          },
+        ],
+      }),
       status: "active",
       intent: "order",
       medicationCodeableConcept: {
@@ -56,20 +58,23 @@ export function generatePatientMedications(
           details.medication_start_date_string
         ).toISOString(),
       }),
+
       dosageInstruction: [
         {
-          ...(details.dosage_quantity && {
-            doseAndRate: [
-              {
-                doseQuantity: {
-                  value: Number(details.dosage_quantity),
-                  unit: details.dosage_unit_name,
-                  system: details.dosage_unit_system || "N/A",
-                  code: details.dosage_unit_code || "N/A",
+          patientInstruction: details.dosage_timing_repeat_count || "",
+          ...(details.dosage_quantity &&
+            Number(details.dosage_quantity) && {
+              doseAndRate: [
+                {
+                  doseQuantity: {
+                    value: Number(details.dosage_quantity),
+                    unit: details.dosage_unit_name,
+                    system: details.dosage_unit_system || "N/A",
+                    code: details.dosage_unit_code || "N/A",
+                  },
                 },
-              },
-            ],
-          }),
+              ],
+            }),
           ...((details.dosage_timing_repeat_count ||
             details.medication_start_date_string ||
             details.medication_end_date_string) && {
@@ -123,12 +128,14 @@ export function generatePatientMedications(
   } else {
     return <MedicationAdministration>{
       resourceType: "MedicationAdministration",
-      identifier: [
-        {
-          system: details.trg_source_system_name,
-          value: details.trg_row_ice_id,
-        },
-      ],
+      ...(details.trg_row_ice_id && {
+        identifier: [
+          {
+            system: details.trg_source_system_name,
+            value: details.trg_row_ice_id,
+          },
+        ],
+      }),
       category: {
         coding: [
           {
@@ -167,23 +174,16 @@ export function generatePatientMedications(
         }),
 
       dosage: {
-        ...(details.dosage_quantity && {
-          dose: {
-            value: Number(details.dosage_quantity),
-            unit: details.dosage_unit_name,
-            system: details.dosage_unit_system || "N/A",
-            code: details.dosage_unit_code || "N/A",
-          },
-        }),
-        ...((details.dosage_timing_repeat_count ||
-          !details.dosage_quantity) && {
-          rateQuantity: {
-            value: Number(details.dosage_timing_repeat_count),
-            unit: details.dosage_unit_name,
-            system: details.dosage_unit_system || "N/A",
-            code: details.dosage_unit_code || "N/A",
-          },
-        }),
+        text: details.dosage_timing_repeat_count || "",
+        ...(details.dosage_quantity &&
+          Number(details.dosage_quantity) && {
+            dose: {
+              value: Number(details.dosage_quantity),
+              unit: details.dosage_unit_name,
+              system: details.dosage_unit_system || "N/A",
+              code: details.dosage_unit_code || "N/A",
+            },
+          }),
         ...(details.administration_route_name && {
           route: {
             coding: [

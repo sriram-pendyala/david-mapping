@@ -13,12 +13,14 @@ export function generateEncounters(
 ) {
   return <Encounter>{
     resourceType: "Encounter",
-    identifier: [
-      {
-        system: encounter.trg_source_system_name,
-        value: encounter.trg_row_ice_id,
-      },
-    ],
+    ...(encounter.trg_row_ice_id && {
+      identifier: [
+        {
+          system: encounter.trg_source_system_name,
+          value: encounter.trg_row_ice_id,
+        },
+      ],
+    }),
     class: {
       system: encounter.encounter_system || "N/A",
       code: encounter.encounter_code || "N/A",
@@ -50,7 +52,6 @@ export function generateEncounters(
     },
     subject: {
       reference: patientUrl,
-      display: "Patient",
     },
   };
 }

@@ -26,16 +26,23 @@ export function generatePatient(demographics: {
 }) {
   const patient: Patient = {
     resourceType: "Patient",
-    identifier: [
-      {
-        system: demographics.trg_source_system_name,
-        value: demographics.trg_row_ice_id,
-      },
-      {
-        system: "http://terminology.hl7.org/CodeSystem/v2-0203",
-        value: demographics.mrn,
-      },
-    ],
+    identifier: demographics.trg_row_ice_id
+      ? [
+          {
+            system: demographics.trg_source_system_name,
+            value: demographics.trg_row_ice_id,
+          },
+          {
+            system: "http://terminology.hl7.org/CodeSystem/v2-0203",
+            value: demographics.mrn,
+          },
+        ]
+      : [
+          {
+            system: "http://terminology.hl7.org/CodeSystem/v2-0203",
+            value: demographics.mrn,
+          },
+        ],
     meta: {
       tag: [
         {

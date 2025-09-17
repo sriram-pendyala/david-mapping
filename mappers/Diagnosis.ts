@@ -25,12 +25,14 @@ export function generateDiagnosis(
 ) {
   return <Condition>{
     resourceType: "Condition",
-    identifier: [
-      {
-        system: diagnosisData.trg_source_system_name,
-        value: diagnosisData.trg_row_ice_id,
-      },
-    ],
+    ...(diagnosisData.trg_row_ice_id && {
+      identifier: [
+        {
+          system: diagnosisData.trg_source_system_name,
+          value: diagnosisData.trg_row_ice_id,
+        },
+      ],
+    }),
     code: {
       coding: [
         {
@@ -43,7 +45,13 @@ export function generateDiagnosis(
     },
     onsetDateTime: diagnosisData.onset_date_string,
     clinicalStatus: {
-      coding: [{}],
+      coding: [
+        {
+          system: diagnosisData.diagnosis_status_system || "N/A",
+          code: diagnosisData.diagnosis_status_code || "N/A",
+          display: diagnosisData.diagnosis_status_name,
+        },
+      ],
       text: diagnosisData.diagnosis_status_name,
     },
     category: [

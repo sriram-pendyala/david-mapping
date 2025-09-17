@@ -25,12 +25,14 @@ export function generatePatientLab(
   const labObservation: Observation = {
     resourceType: "Observation",
     id: `observation-${details.trg_row_ice_id}`,
-    identifier: [
-      {
-        system: details.trg_source_system_name,
-        value: details.trg_row_ice_id,
-      },
-    ],
+    ...(details.trg_row_ice_id && {
+      identifier: [
+        {
+          system: details.trg_source_system_name,
+          value: details.trg_row_ice_id,
+        },
+      ],
+    }),
     ...(details.effective_date_string && {
       effectiveDateTime: new Date(details.effective_date_string).toISOString(),
     }),
@@ -50,15 +52,16 @@ export function generatePatientLab(
         },
       ],
     },
-    ...(details.lab_value_quantity && {
-      valueQuantity: {
-        system: details.quantity_unit_system || "N/A",
-        code: details.quantity_unit_code || "N/A",
-        unit: details.quantity_unit_name,
-        value: Number(details.lab_value_quantity),
-        comparator: details.quantity_comparator as any,
-      },
-    }),
+    ...(details.lab_value_quantity &&
+      Number(details.lab_value_quantity) && {
+        valueQuantity: {
+          system: details.quantity_unit_system || "N/A",
+          code: details.quantity_unit_code || "N/A",
+          unit: details.quantity_unit_name,
+          value: Number(details.lab_value_quantity),
+          comparator: details.quantity_comparator as any,
+        },
+      }),
     ...(!details.lab_value_quantity && {
       valueCodeableConcept: {
         coding: [
@@ -68,6 +71,7 @@ export function generatePatientLab(
             system: details.lab_type_system || "N/A",
           },
         ],
+        text: details.lab_value_name || "N/A",
       },
     }),
     code: {
@@ -84,12 +88,14 @@ export function generatePatientLab(
   const labReport: DiagnosticReport = {
     resourceType: "DiagnosticReport",
     id: `diagnosticreport-${details.trg_row_ice_id}`,
-    identifier: [
-      {
-        system: details.trg_source_system_name,
-        value: details.trg_row_ice_id,
-      },
-    ],
+    ...(details.trg_row_ice_id && {
+      identifier: [
+        {
+          system: details.trg_source_system_name,
+          value: details.trg_row_ice_id,
+        },
+      ],
+    }),
     status: "final",
     category: [
       {

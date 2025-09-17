@@ -34,12 +34,14 @@ export function generatePatientRadioTherapies(
 ) {
   const procedure: Procedure = {
     resourceType: "Procedure",
-    identifier: [
-      {
-        system: details.trg_source_system_name,
-        value: details.trg_row_ice_id,
-      },
-    ],
+    ...(details.trg_row_ice_id && {
+      identifier: [
+        {
+          system: details.trg_source_system_name,
+          value: details.trg_row_ice_id,
+        },
+      ],
+    }),
     status: "completed",
     category: {
       coding: [

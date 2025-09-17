@@ -18,12 +18,14 @@ export function generateEncounterSchedule(
 ) {
   return <Appointment>{
     resourceType: "Appointment",
-    identifier: [
-      {
-        system: encounter_schedules.trg_source_system_name,
-        value: encounter_schedules.trg_row_ice_id,
-      },
-    ],
+    ...(encounter_schedules.trg_row_ice_id && {
+      identifier: [
+        {
+          system: encounter_schedules.trg_source_system_name,
+          value: encounter_schedules.trg_row_ice_id,
+        },
+      ],
+    }),
     meta: {
       tag: [
         {

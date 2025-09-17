@@ -41,7 +41,8 @@ async function processFile() {
 function processJsonFile(content: string, filename: string, codes: any[]) {
   const data = JSON.parse(content);
   // Add your JSON processing logic here
-  const demographics = data.clinical_domain.demographics.at(0);
+  const demographics =
+    data.clinical_domain?.demographics.at(0) || data.demographics.at(0);
   const patientId = data.patient_tempus_id || uuid.v4();
   let bundle: Bundle | null = null;
   if (!demographics) {
@@ -65,7 +66,9 @@ function processJsonFile(content: string, filename: string, codes: any[]) {
   };
 
   // Insert diagnosis.
-  const diagnoses = ((data.clinical_domain.diagnoses as any[]) || [])
+  const diagnoses = (
+    ((data.clinical_domain?.diagnoses || data.diagnoses || []) as any[]) || []
+  )
     .map((diagnosis) => generateDiagnosis(codes, diagnosis, patientUrl))
     .map((diag) => ({
       fullUrl: `urn:uuid:${uuid.v4()}`,
@@ -81,7 +84,10 @@ function processJsonFile(content: string, filename: string, codes: any[]) {
   }
 
   // Insert Assessments.
-  const assessments = ((data.clinical_domain.assessments as any[]) || [])
+  const assessments = (
+    ((data.clinical_domain?.assessments || data?.assessments || []) as any[]) ||
+    []
+  )
     .map((assessment) => generateAssessment(assessment, patientUrl))
     .map((assessment) => ({
       fullUrl: `urn:uuid:${uuid.v4()}`,
@@ -97,7 +103,11 @@ function processJsonFile(content: string, filename: string, codes: any[]) {
   }
 
   // Insert Comorbidities.
-  const comorbidities = ((data.clinical_domain.comorbidities as any[]) || [])
+  const comorbidities = (
+    ((data.clinical_domain?.comorbidities ||
+      data.comorbidities ||
+      []) as any[]) || []
+  )
     .map((comorbidity) => generateCamorbidities(comorbidity, patientUrl))
     .map((comorbidity) => ({
       fullUrl: `urn:uuid:${uuid.v4()}`,
@@ -113,7 +123,11 @@ function processJsonFile(content: string, filename: string, codes: any[]) {
   }
 
   // Insert Encounter_schedules
-  const encounters = ((data.clinical_domain.encounter_schedules as any[]) || [])
+  const encounters = (
+    ((data.clinical_domain?.encounter_schedules ||
+      data.encounter_schedules ||
+      []) as any[]) || []
+  )
     .map((encounter) => generateEncounterSchedule(encounter, patientUrl))
     .map((encounter) => ({
       fullUrl: `urn:uuid:${uuid.v4()}`,
@@ -129,7 +143,9 @@ function processJsonFile(content: string, filename: string, codes: any[]) {
   }
 
   // Insert Encounters.
-  const encounterEntries = ((data.clinical_domain.encounters as any[]) || [])
+  const encounterEntries = (
+    ((data.clinical_domain?.encounters || data.encounters || []) as any[]) || []
+  )
     .map((encounter) => generateEncounters(encounter, patientUrl))
     .map((encounter) => ({
       fullUrl: `urn:uuid:${uuid.v4()}`,
@@ -147,7 +163,9 @@ function processJsonFile(content: string, filename: string, codes: any[]) {
   // Insert Family Member History.
 
   const familyMembers = (
-    (data.clinical_domain.family_member_history as any[]) || []
+    ((data.clinical_domain?.family_member_history ||
+      data.family_member_history ||
+      []) as any[]) || []
   )
     .map((member) => generateFamilyMemberHistories(codes, member, patientUrl))
     .map((member) => ({
@@ -164,7 +182,9 @@ function processJsonFile(content: string, filename: string, codes: any[]) {
   }
 
   // Insert imagings DIAGNOSTICS
-  const imagings = ((data.clinical_domain.imagings as any[]) || [])
+  const imagings = (
+    ((data.clinical_domain?.imagings || data.imagings || []) as any[]) || []
+  )
     .map((imaging) => generateImagingDiagnostics(imaging, patientUrl))
     .map((imaging) => ({
       fullUrl: `urn:uuid:${uuid.v4()}`,
@@ -180,7 +200,9 @@ function processJsonFile(content: string, filename: string, codes: any[]) {
   }
 
   // Insert Labs
-  const labsDetails = ((data.clinical_domain.labs as any[]) || [])
+  const labsDetails = (
+    ((data.clinical_domain?.labs || data.labs || []) as any[]) || []
+  )
     .map((lab) => generatePatientLab(lab, patientUrl))
     .map(({ labObservation, labReport }) => {
       const observationId = `urn:uuid:${uuid.v4()}`;
@@ -212,7 +234,10 @@ function processJsonFile(content: string, filename: string, codes: any[]) {
 
   // Insert medications
 
-  const medications = ((data.clinical_domain.medications as any[]) || [])
+  const medications = (
+    ((data.clinical_domain?.medications || data.medications || []) as any[]) ||
+    []
+  )
     .map((med) => generatePatientMedications(med, patientUrl))
     .map((medication) => ({
       fullUrl: `urn:uuid:${uuid.v4()}`,
@@ -228,7 +253,11 @@ function processJsonFile(content: string, filename: string, codes: any[]) {
   }
 
   // Insert other diagnosis
-  const otherDiagnoses = ((data.clinical_domain.other_diagnoses as any[]) || [])
+  const otherDiagnoses = (
+    ((data.clinical_domain?.other_diagnoses ||
+      data.other_diagnoses ||
+      []) as any[]) || []
+  )
     .map((diagnosis) =>
       generateDiagnosis(
         codes,
@@ -269,7 +298,11 @@ function processJsonFile(content: string, filename: string, codes: any[]) {
   }
 
   //Insert Procedures
-  const procedures = ((data.clinical_domain.other_procedures as any[]) || [])
+  const procedures = (
+    ((data.clinical_domain?.other_procedures ||
+      data.other_procedures ||
+      []) as any[]) || []
+  )
     .map((procedure) => generateProcedure(codes, procedure, patientUrl))
     .map((proc) => ({
       fullUrl: `urn:uuid:${uuid.v4()}`,
@@ -285,7 +318,9 @@ function processJsonFile(content: string, filename: string, codes: any[]) {
   }
 
   // Insert Vitals
-  const vitals = ((data.clinical_domain.vitals as any[]) || [])
+  const vitals = (
+    ((data.clinical_domain?.vitals || data.vitals || []) as any[]) || []
+  )
     .map((vital) => generatePatientVitals(vital, patientUrl))
     .map((observation) => {
       const observationId = `urn:uuid:${uuid.v4()}`;
@@ -302,7 +337,9 @@ function processJsonFile(content: string, filename: string, codes: any[]) {
   if (bundle && vitals.length > 0) bundle.entry?.push(...vitals);
 
   // Insert surgeries
-  const surgeries = ((data.clinical_domain.surgeries as any[]) || [])
+  const surgeries = (
+    ((data.clinical_domain?.surgeries || data.surgeries || []) as any[]) || []
+  )
     .map((surgery) =>
       generateProcedure(
         codes,
@@ -333,7 +370,9 @@ function processJsonFile(content: string, filename: string, codes: any[]) {
 
   // Insert Molecular Sequencing
   const molecularSequencings = (
-    (data.clinical_domain.molecular_sequencings as any[]) || []
+    ((data.clinical_domain?.molecular_sequencings ||
+      data.molecular_sequencings ||
+      []) as any[]) || []
   )
     .map((molecular) =>
       generatePatientMolecularSequencing(molecular, patientUrl)
@@ -359,7 +398,11 @@ function processJsonFile(content: string, filename: string, codes: any[]) {
     .flat();
 
   // Insert Radio Therapies
-  const radioTherapies = ((data.clinical_domain.radiotherapies as any[]) || [])
+  const radioTherapies = (
+    ((data.clinical_domain?.radiotherapies ||
+      data.radiotherapies ||
+      []) as any[]) || []
+  )
     .map((radio) => generatePatientRadioTherapies(radio, patientUrl))
     .map((radio) => ({
       fullUrl: `urn:uuid:${uuid.v4()}`,

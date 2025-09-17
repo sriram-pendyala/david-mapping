@@ -22,12 +22,14 @@ export function generateCamorbidities(
 ) {
   return <Condition>{
     resourceType: "Condition",
-    identifier: [
-      {
-        system: comorbidities.trg_source_system_name,
-        value: comorbidities.trg_row_ice_id,
-      },
-    ],
+    ...(comorbidities.trg_row_ice_id && {
+      identifier: [
+        {
+          system: comorbidities.trg_source_system_name,
+          value: comorbidities.trg_row_ice_id,
+        },
+      ],
+    }),
     onsetDateTime: comorbidities.onset_date_string,
     code: {
       coding: [

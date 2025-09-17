@@ -19,12 +19,14 @@ export function generateFamilyMemberHistories(
 ) {
   return <FamilyMemberHistory>{
     resourceType: "FamilyMemberHistory",
-    identifier: [
-      {
-        system: members.trg_source_system_name,
-        value: members.trg_row_ice_id,
-      },
-    ],
+    ...(members.trg_row_ice_id && {
+      identifier: [
+        {
+          system: members.trg_source_system_name,
+          value: members.trg_row_ice_id,
+        },
+      ],
+    }),
     meta: {
       tag: [
         {
@@ -40,7 +42,6 @@ export function generateFamilyMemberHistories(
     status: "health-unknown",
     patient: {
       reference: patientUrl,
-      display: "Patient",
     },
     date: members.effective_date_string,
     relationship: {

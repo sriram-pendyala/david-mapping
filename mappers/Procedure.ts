@@ -23,12 +23,14 @@ export function generateProcedure(
 
   return <Procedure>{
     resourceType: "Procedure",
-    identifier: [
-      {
-        system: procedure.trg_source_system_name,
-        value: procedure.trg_row_ice_id,
-      },
-    ],
+    ...(procedure.trg_row_ice_id && {
+      identifier: [
+        {
+          system: procedure.trg_source_system_name,
+          value: procedure.trg_row_ice_id,
+        },
+      ],
+    }),
     status: "completed",
     code: {
       coding: [

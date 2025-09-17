@@ -15,12 +15,14 @@ export function generateImagingDiagnostics(
   return <DiagnosticReport>{
     resourceType: "DiagnosticReport",
     status: "final",
-    identifier: [
-      {
-        system: resource.trg_source_system_name,
-        value: resource.trg_row_ice_id,
-      },
-    ],
+    ...(resource.trg_row_ice_id && {
+      identifier: [
+        {
+          system: resource.trg_source_system_name,
+          value: resource.trg_row_ice_id,
+        },
+      ],
+    }),
     code: {
       coding: [
         {
