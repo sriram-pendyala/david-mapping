@@ -199,38 +199,39 @@ function processJsonFile(content: string, filename: string, codes: any[]) {
     bundle.entry?.push(...imagings);
   }
 
-  // // Insert Labs
-  // const labsDetails = (
-  //   ((data.clinical_domain?.labs || data.labs || []) as any[]) || []
-  // )
-  //   .map((lab) => generatePatientLab(lab, patientUrl))
-  //   .map(({ labObservation, labReport }) => {
-  //     const observationId = `urn:uuid:${uuid.v4()}`;
-  //     return [
-  //       {
-  //         fullUrl: observationId,
-  //         request: {
-  //           method: "POST" as any,
-  //           url: "Observation",
-  //         },
-  //         resource: labObservation,
-  //       },
-  //       {
-  //         fullUrl: `urn:uuid:${uuid.v4()}`,
-  //         request: {
-  //           method: "POST" as any,
-  //           url: "DiagnosticReport",
-  //         },
-  //         resource: {
-  //           ...labReport,
-  //           result: [{ reference: observationId }],
-  //         },
-  //       },
-  //     ];
-  //   })
-  //   .flat();
+  // Insert Labs
+  const labsDetails = (
+    ((data.clinical_domain?.labs || data.labs || []) as any[]) || []
+  )
+    .map((lab) => generatePatientLab(lab, patientUrl))
+    .map(({ labObservation, labReport }) => {
+      const id = uuid.v4();
+      const observationId = `urn:uuid:${id}`;
+      return [
+        {
+          fullUrl: observationId,
+          request: {
+            method: "POST" as any,
+            url: "Observation",
+          },
+          resource: { ...labObservation, id },
+        },
+        {
+          fullUrl: `urn:uuid:${uuid.v4()}`,
+          request: {
+            method: "POST" as any,
+            url: "DiagnosticReport",
+          },
+          resource: {
+            ...labReport,
+            result: [{ reference: observationId }],
+          },
+        },
+      ];
+    })
+    .flat();
 
-  // if (bundle && labsDetails.length > 0) bundle.entry?.push(...labsDetails);
+  if (bundle && labsDetails.length > 0) bundle.entry?.push(...labsDetails);
 
   // Insert medications
 
