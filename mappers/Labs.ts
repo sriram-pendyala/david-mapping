@@ -87,7 +87,6 @@ export function generatePatientLab(
   };
   const labReport: DiagnosticReport = {
     resourceType: "DiagnosticReport",
-    id: `diagnosticreport-${details.trg_row_ice_id}`,
     ...(details.trg_row_ice_id && {
       identifier: [
         {

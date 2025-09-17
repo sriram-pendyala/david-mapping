@@ -32,7 +32,7 @@ export function generatePatientVitals(
     }),
     status: "final",
     ...(details.effective_date_string && {
-      effectiveDateTime: details.effective_date_string,
+      effectiveDateTime: new Date(details.effective_date_string).toISOString(),
     }),
     category: [
       {
