@@ -75,13 +75,15 @@ export function generatePatientMedications(
                 },
               ],
             }),
-          ...((details.dosage_timing_repeat_count ||
-            details.medication_start_date_string ||
+          ...((details.medication_start_date_string ||
             details.medication_end_date_string) && {
             timing: {
               repeat: {
-                frequency:
-                  Number(details.dosage_timing_repeat_count) || undefined,
+                ...(details.dosage_timing_repeat_count &&
+                  Number(details.dosage_timing_repeat_count) && {
+                    frequency:
+                      Number(details.dosage_timing_repeat_count) || undefined,
+                  }),
                 boundsPeriod: {
                   start: details.medication_start_date_string
                     ? new Date(
@@ -173,29 +175,32 @@ export function generatePatientMedications(
           },
         }),
 
-      dosage: {
-        text: details.dosage_timing_repeat_count || "",
-        ...(details.dosage_quantity &&
-          Number(details.dosage_quantity) && {
-            dose: {
-              value: Number(details.dosage_quantity),
-              unit: details.dosage_unit_name,
-              system: details.dosage_unit_system || "N/A",
-              code: details.dosage_unit_code || "N/A",
-            },
-          }),
-        ...(details.administration_route_name && {
-          route: {
-            coding: [
-              {
-                system: details.administration_route_system || "N/A",
-                code: details.administration_route_code || "N/A",
-                display: details.administration_route_name,
+      ...(details.dosage_quantity &&
+        Number(details.dosage_quantity) && {
+          dosage: {
+            text: details.dosage_timing_repeat_count || "",
+            ...(details.dosage_quantity &&
+              Number(details.dosage_quantity) && {
+                dose: {
+                  value: Number(details.dosage_quantity),
+                  unit: details.dosage_unit_name,
+                  system: details.dosage_unit_system || "N/A",
+                  code: details.dosage_unit_code || "N/A",
+                },
+              }),
+            ...(details.administration_route_name && {
+              route: {
+                coding: [
+                  {
+                    system: details.administration_route_system || "N/A",
+                    code: details.administration_route_code || "N/A",
+                    display: details.administration_route_name,
+                  },
+                ],
               },
-            ],
+            }),
           },
         }),
-      },
       meta: {
         tag: [
           {
