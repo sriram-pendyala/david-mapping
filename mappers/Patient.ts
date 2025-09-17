@@ -95,7 +95,9 @@ export function generatePatient(demographics: {
     ...(demographics.date_of_death_string && {
       deceasedDateTime: demographics.date_of_death_string,
     }),
-    deceasedBoolean: !!demographics.deceased,
+    ...(!demographics.date_of_death_string && {
+      deceasedBoolean: !!demographics.deceased,
+    }),
     name: [
       {
         family: demographics.family_name,
