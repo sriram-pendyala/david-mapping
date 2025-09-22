@@ -1,4 +1,6 @@
 import { Encounter } from "fhir/r4";
+import * as uuid from "uuid";
+
 export function generateEncounters(
   encounter: {
     trg_source_system_name: string;
@@ -12,6 +14,7 @@ export function generateEncounters(
   patientUrl: string
 ) {
   return <Encounter>{
+    id: uuid.v4(),
     resourceType: "Encounter",
     ...(encounter.trg_row_ice_id && {
       identifier: [

@@ -49,7 +49,7 @@ function processJsonFile(content: string, filename: string, codes: any[]) {
     throw new Error(`No demographics data found in file: ${filename}`);
   }
   const patient = generatePatient(demographics);
-  const patientUrl = `urn:uuid:${patientId}`;
+  const patientUrl = `Patient/${patient.id}`;
   bundle = {
     resourceType: "Bundle",
     type: "transaction",
@@ -222,10 +222,7 @@ function processJsonFile(content: string, filename: string, codes: any[]) {
             method: "POST" as any,
             url: "DiagnosticReport",
           },
-          resource: {
-            ...labReport,
-            result: [{ reference: observationId }],
-          },
+          resource: labReport,
         },
       ];
     })

@@ -1,4 +1,5 @@
 import { Observation } from "fhir/r4";
+import * as uuid from "uuid";
 
 export function generatePatientVitals(
   details: {
@@ -21,6 +22,7 @@ export function generatePatientVitals(
   patientUrl: string
 ) {
   return <Observation>{
+    id: uuid.v4(),
     resourceType: "Observation",
     ...(details.trg_row_ice_id && {
       identifier: [

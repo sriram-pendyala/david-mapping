@@ -74,7 +74,7 @@ export function generatePatientMolecularSequencing(
     },
     derivedFrom: [
       {
-        reference: `urn:uuid:${molecularSequenceId}`,
+        reference: `MolecularSequence/${molecularSequenceId}`,
       },
     ],
     meta: {

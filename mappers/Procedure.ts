@@ -1,5 +1,6 @@
 import { Procedure } from "fhir/r4";
 import { HCPCSCodes } from "../hcpcs";
+import * as uuid from "uuid";
 
 export function generateProcedure(
   codes: any,
@@ -22,6 +23,7 @@ export function generateProcedure(
     : "N/A";
 
   return <Procedure>{
+    id: uuid.v4(),
     resourceType: "Procedure",
     ...(procedure.trg_row_ice_id && {
       identifier: [

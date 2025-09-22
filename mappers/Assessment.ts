@@ -1,4 +1,5 @@
 import { Observation } from "fhir/r4";
+import * as uuid from "uuid";
 
 export function generateAssessment(
   assessment: {
@@ -24,6 +25,7 @@ export function generateAssessment(
 ) {
   return <Observation>{
     resourceType: "Observation",
+    id: uuid.v4(),
     ...(assessment.trg_row_ice_id && {
       identifier: [
         {

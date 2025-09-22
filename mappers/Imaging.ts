@@ -1,4 +1,5 @@
 import { DiagnosticReport } from "fhir/r4";
+import * as uuid from "uuid";
 
 export function generateImagingDiagnostics(
   resource: {
@@ -13,6 +14,7 @@ export function generateImagingDiagnostics(
   patientUrl: string
 ) {
   return <DiagnosticReport>{
+    id: uuid.v4(),
     resourceType: "DiagnosticReport",
     status: "final",
     ...(resource.trg_row_ice_id && {

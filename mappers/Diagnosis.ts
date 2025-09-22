@@ -1,4 +1,5 @@
 import { Condition } from "fhir/r4";
+import * as uuid from "uuid";
 import { text } from "stream/consumers";
 
 export function generateDiagnosis(
@@ -24,6 +25,7 @@ export function generateDiagnosis(
   patientUrl: string
 ) {
   return <Condition>{
+    id: uuid.v4(),
     resourceType: "Condition",
     ...(diagnosisData.trg_row_ice_id && {
       identifier: [
@@ -43,7 +45,9 @@ export function generateDiagnosis(
       ],
       text: codes[diagnosisData.diagnosis_name] || diagnosisData.diagnosis_name,
     },
-    onsetDateTime: diagnosisData.onset_date_string,
+    ...(diagnosisData.onset_date_string && {
+      onsetDateTime: diagnosisData.onset_date_string,
+    }),
     clinicalStatus: {
       coding: [
         {

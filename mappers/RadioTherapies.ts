@@ -1,4 +1,5 @@
 import { Procedure } from "fhir/r4";
+import * as uuid from "uuid";
 
 export function generatePatientRadioTherapies(
   details: {
@@ -33,6 +34,7 @@ export function generatePatientRadioTherapies(
   patientUrl: string
 ) {
   const procedure: Procedure = {
+    id: uuid.v4(),
     resourceType: "Procedure",
     ...(details.trg_row_ice_id && {
       identifier: [

@@ -1,4 +1,5 @@
 import { Appointment } from "fhir/r4";
+import * as uuid from "uuid";
 
 export function generateEncounterSchedule(
   encounter_schedules: {
@@ -17,6 +18,7 @@ export function generateEncounterSchedule(
   patientUrl: string
 ) {
   return <Appointment>{
+    id: uuid.v4(),
     resourceType: "Appointment",
     ...(encounter_schedules.trg_row_ice_id && {
       identifier: [

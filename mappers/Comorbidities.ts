@@ -1,4 +1,5 @@
 import { Condition } from "fhir/r4";
+import * as uuid from "uuid";
 
 export function generateCamorbidities(
   comorbidities: {
@@ -21,6 +22,7 @@ export function generateCamorbidities(
   patientUrl: string
 ) {
   return <Condition>{
+    id: uuid.v4(),
     resourceType: "Condition",
     ...(comorbidities.trg_row_ice_id && {
       identifier: [
@@ -30,7 +32,9 @@ export function generateCamorbidities(
         },
       ],
     }),
-    onsetDateTime: comorbidities.onset_date_string,
+    ...(comorbidities.onset_date_string && {
+      onsetDateTime: comorbidities.onset_date_string,
+    }),
     code: {
       coding: [
         {

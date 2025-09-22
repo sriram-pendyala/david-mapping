@@ -1,4 +1,5 @@
 import { Patient } from "fhir/r4";
+import * as uuid from "uuid";
 
 export function generatePatient(demographics: {
   trg_source_system_name: string;
@@ -26,6 +27,7 @@ export function generatePatient(demographics: {
 }) {
   const patient: Patient = {
     resourceType: "Patient",
+    id: uuid.v4(),
     identifier: demographics.trg_row_ice_id
       ? [
           {

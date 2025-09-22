@@ -1,4 +1,5 @@
 import { FamilyMemberHistory } from "fhir/r4";
+import * as uuid from "uuid";
 
 export function generateFamilyMemberHistories(
   codes: any,
@@ -18,6 +19,7 @@ export function generateFamilyMemberHistories(
   patientUrl: string
 ) {
   return <FamilyMemberHistory>{
+    id: uuid.v4(),
     resourceType: "FamilyMemberHistory",
     ...(members.trg_row_ice_id && {
       identifier: [

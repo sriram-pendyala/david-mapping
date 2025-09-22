@@ -1,4 +1,5 @@
 import { MedicationAdministration, MedicationRequest } from "fhir/r4";
+import * as uuid from "uuid";
 
 export function generatePatientMedications(
   details: {
@@ -30,6 +31,7 @@ export function generatePatientMedications(
     )
   ) {
     return <MedicationRequest>{
+      id: uuid.v4(),
       resourceType: "MedicationRequest",
       ...(details.trg_row_ice_id && {
         identifier: [
@@ -129,6 +131,7 @@ export function generatePatientMedications(
     };
   } else {
     return <MedicationAdministration>{
+      id: uuid.v4(),
       resourceType: "MedicationAdministration",
       ...(details.trg_row_ice_id && {
         identifier: [

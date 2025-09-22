@@ -1,4 +1,5 @@
 import { DiagnosticReport, Observation } from "fhir/r4";
+import * as uuid from "uuid";
 
 export function generatePatientLab(
   details: {
@@ -22,9 +23,10 @@ export function generatePatientLab(
   },
   patientUrl: string
 ) {
+  const observationId = uuid.v4();
   const labObservation: Observation = {
     resourceType: "Observation",
-    id: `observation-${details.trg_row_ice_id}`,
+    id: observationId,
     ...(details.trg_row_ice_id && {
       identifier: [
         {
@@ -86,6 +88,7 @@ export function generatePatientLab(
     status: "final",
   };
   const labReport: DiagnosticReport = {
+    id: uuid.v4(),
     resourceType: "DiagnosticReport",
     ...(details.trg_row_ice_id && {
       identifier: [
@@ -138,7 +141,7 @@ export function generatePatientLab(
     }),
     result: [
       {
-        reference: `Observation/observation-${details.trg_row_ice_id}`,
+        reference: `Observation/${observationId}`,
       },
     ],
   };
