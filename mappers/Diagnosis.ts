@@ -43,7 +43,9 @@ export function generateDiagnosis(
           display: diagnosisData.diagnosis_name,
         },
       ],
-      text: codes[diagnosisData.diagnosis_name] || diagnosisData.diagnosis_name,
+      text:
+        codes[diagnosisData.diagnosis_name.replace(/\./g, "")] ||
+        diagnosisData.diagnosis_name,
     },
     ...(diagnosisData.onset_date_string && {
       onsetDateTime: diagnosisData.onset_date_string,

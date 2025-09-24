@@ -67,8 +67,9 @@ export function generateFamilyMemberHistories(
             },
           ],
           text:
-            codes[members.family_member_history_condition_name] ||
-            members.family_member_history_condition_name,
+            codes[
+              members.family_member_history_condition_name.replace(/\./g, "")
+            ] || members.family_member_history_condition_name,
         },
       },
     ],

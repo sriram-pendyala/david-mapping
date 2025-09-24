@@ -50,9 +50,11 @@ export function generateEncounters(
         text: encounter.encounter_name,
       },
     ],
-    period: {
-      start: encounter.effective_date_string,
-    },
+    ...(encounter.effective_date_string && {
+      period: {
+        start: new Date(encounter.effective_date_string).toISOString(),
+      },
+    }),
     subject: {
       reference: patientUrl,
     },

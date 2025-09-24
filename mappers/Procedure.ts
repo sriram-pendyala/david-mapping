@@ -16,9 +16,11 @@ export function generateProcedure(
   patientUrl: string
 ) {
   const name = procedure.other_procedure_name
-    ? HCPCSCodes.find((code) => code.code === procedure.other_procedure_name)
-        ?.short_description ||
-      codes[procedure.other_procedure_name] ||
+    ? HCPCSCodes.find(
+        (code) =>
+          code.code.trim() === procedure.other_procedure_name.replace(/\./g, "")
+      )?.short_description ||
+      codes[procedure.other_procedure_name.replace(/\./g, "")] ||
       procedure.other_procedure_name
     : "N/A";
 
@@ -47,7 +49,11 @@ export function generateProcedure(
     subject: {
       reference: patientUrl,
     },
-    performedDateTime: procedure.performed_date_string,
+    ...(procedure.performed_date_string && {
+      performedDateTime: new Date(
+        procedure.performed_date_string
+      ).toISOString(),
+    }),
     meta: {
       tag: [
         {

@@ -33,6 +33,26 @@ export function generatePatientRadioTherapies(
   },
   patientUrl: string
 ) {
+  const procedureExtensions = [];
+  if (parseFloat(details.dose_quantity)) {
+    procedureExtensions.push({
+      url: "totalDoseDelivered",
+      valueQuantity: {
+        value: parseFloat(details.dose_quantity),
+        unit: details.dosage_unit_name || "N/A",
+        system: details.dosage_unit_system || "N/A",
+        code: details.dosage_unit_code || "N/A",
+      },
+    });
+  }
+  if (parseInt(details.fraction)) {
+    procedureExtensions.push({
+      url: "numberOfFractionsDelivered",
+      valuePositiveInt: details.fraction
+        ? parseInt(details.fraction)
+        : undefined,
+    });
+  }
   const procedure: Procedure = {
     id: uuid.v4(),
     resourceType: "Procedure",
@@ -72,10 +92,17 @@ export function generatePatientRadioTherapies(
     subject: {
       reference: patientUrl,
     },
-    performedPeriod: {
-      start: details.radiotherapy_start_date_string || undefined,
-      end: details.radiotherapy_end_date_string || undefined,
-    },
+    ...((details.radiotherapy_start_date_string ||
+      details.radiotherapy_end_date_string) && {
+      performedPeriod: {
+        start: details.radiotherapy_start_date_string
+          ? new Date(details.radiotherapy_start_date_string).toISOString()
+          : undefined,
+        end: details.radiotherapy_end_date_string
+          ? new Date(details.radiotherapy_end_date_string).toISOString()
+          : undefined,
+      },
+    }),
     bodySite: details.body_site_code
       ? [
           {
@@ -93,23 +120,7 @@ export function generatePatientRadioTherapies(
     extension: [
       {
         url: "http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-radiotherapy-dose-delivered-to-volume",
-        extension: [
-          {
-            url: "totalDoseDelivered",
-            valueQuantity: {
-              value: parseFloat(details.dose_quantity),
-              unit: details.dosage_unit_name || "N/A",
-              system: details.dosage_unit_system || "N/A",
-              code: details.dosage_unit_code || "N/A",
-            },
-          },
-          {
-            url: "numberOfFractionsDelivered",
-            valuePositiveInt: details.fraction
-              ? parseInt(details.fraction)
-              : undefined,
-          },
-        ],
+        extension: procedureExtensions,
       },
       {
         url: "ordered_administered_flag",
