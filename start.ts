@@ -45,8 +45,23 @@ async function generatePatientBundles() {
   try {
     const results = await Promise.all(workers);
     console.log("All files processed successfully");
-    clipboardy.writeSync(JSON.stringify(results, null, 2));
-    console.log("copy complete");
+    const outputDir = "./output";
+    await fs.mkdir(outputDir, { recursive: true });
+
+    for (const { filename, result } of results as any[]) {
+      const outputFilePath = path.join(
+        outputDir,
+        `${path.parse(filename).name}-bundle.json`
+      );
+      await fs.writeFile(
+        outputFilePath,
+        JSON.stringify(result, null, 2),
+        "utf8"
+      );
+      console.log(`Written bundle to ${outputFilePath}`);
+    }
+    // clipboardy.writeSync(JSON.stringify(results, null, 2));
+    // console.log("copy complete");
     // results.forEach((res) => {
     //   console.log(`Results: `);
     //   console.log(JSON.stringify(res));

@@ -2,3 +2,4 @@ node_modules/
 data/*
 !data/
 example-data
+output/*

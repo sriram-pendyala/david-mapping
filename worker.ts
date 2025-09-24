@@ -28,7 +28,12 @@ async function processFile() {
     const result = processJsonFile(content, filename, icdCodes);
 
     // Send result back to main thread
-    parentPort?.postMessage(result);
+    parentPort?.postMessage({
+      filename,
+      result,
+      success: true,
+      error: null,
+    });
   } catch (error) {
     parentPort?.postMessage({
       filename,
@@ -205,8 +210,7 @@ function processJsonFile(content: string, filename: string, codes: any[]) {
   )
     .map((lab) => generatePatientLab(lab, patientUrl))
     .map(({ labObservation, labReport }) => {
-      const id = uuid.v4();
-      const observationId = `urn:uuid:${id}`;
+      const observationId = `urn:uuid:${labObservation.id}`;
       return [
         {
           fullUrl: observationId,
@@ -214,7 +218,7 @@ function processJsonFile(content: string, filename: string, codes: any[]) {
             method: "POST" as any,
             url: "Observation",
           },
-          resource: { ...labObservation, id },
+          resource: labObservation,
         },
         {
           fullUrl: `urn:uuid:${uuid.v4()}`,
