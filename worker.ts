@@ -35,6 +35,7 @@ async function processFile() {
       error: null,
     });
   } catch (error) {
+    console.error(`Error processing file ${filename}:`, error);
     parentPort?.postMessage({
       filename,
       success: false,
@@ -44,10 +45,11 @@ async function processFile() {
 }
 
 function processJsonFile(content: string, filename: string, codes: any[]) {
+  console.log("Processing JSON file:", filename);
   const data = JSON.parse(content);
   // Add your JSON processing logic here
   const demographics =
-    data.clinical_domain?.demographics.at(0) || data.demographics.at(0);
+    data.clinical_domain?.demographics?.at(0) || data.demographics?.at(0);
   const patientId = data.patient_tempus_id || uuid.v4();
   let bundle: Bundle | null = null;
   if (!demographics) {

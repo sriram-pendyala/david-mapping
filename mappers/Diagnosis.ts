@@ -40,7 +40,9 @@ export function generateDiagnosis(
         {
           system: diagnosisData.diagnosis_system || "N/A",
           code: diagnosisData.diagnosis_code || "N/A",
-          display: diagnosisData.diagnosis_name,
+          display:
+            codes[diagnosisData.diagnosis_code.replace(/\./g, "")] ||
+            diagnosisData.diagnosis_name,
         },
       ],
       text:

@@ -49,6 +49,7 @@ async function generatePatientBundles() {
     await fs.mkdir(outputDir, { recursive: true });
 
     for (const { filename, result } of results as any[]) {
+      console.log("%%%%%", JSON.stringify(result).substring(0, 200));
       const outputFilePath = path.join(
         outputDir,
         `${path.parse(filename).name}-bundle.json`

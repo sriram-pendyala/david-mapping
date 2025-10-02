@@ -41,7 +41,9 @@ export function generateCamorbidities(
         {
           system: comorbidities.comorbidity_system || "N/A",
           code: comorbidities.comorbidity_code || "N/A",
-          display: comorbidities.comorbidity_name,
+          display:
+            codes[comorbidities.comorbidity_code.replace(/\./g, "")] ||
+            comorbidities.comorbidity_name,
         },
       ],
       text:
