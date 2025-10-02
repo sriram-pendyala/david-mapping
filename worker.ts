@@ -113,7 +113,7 @@ function processJsonFile(content: string, filename: string, codes: any[]) {
       data.comorbidities ||
       []) as any[]) || []
   )
-    .map((comorbidity) => generateCamorbidities(comorbidity, patientUrl))
+    .map((comorbidity) => generateCamorbidities(codes, comorbidity, patientUrl))
     .map((comorbidity) => ({
       fullUrl: `urn:uuid:${uuid.v4()}`,
       request: {

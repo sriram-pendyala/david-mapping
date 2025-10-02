@@ -44,7 +44,7 @@ export function generateDiagnosis(
         },
       ],
       text:
-        codes[diagnosisData.diagnosis_name.replace(/\./g, "")] ||
+        codes[diagnosisData.diagnosis_code.replace(/\./g, "")] ||
         diagnosisData.diagnosis_name,
     },
     ...(diagnosisData.onset_date_string && {
@@ -62,13 +62,11 @@ export function generateDiagnosis(
     },
     category: [
       {
-        coding: [
-          {
-            system: diagnosisData.diagnosis_class_system || "N/A",
-            code: diagnosisData.diagnosis_class_code || "N/A",
-          },
-        ],
-        text: diagnosisData.diagnosis_class_name,
+        text:
+          Number(diagnosisData.diagnosis_class_code) &&
+          Number(diagnosisData.diagnosis_class_code) === 1
+            ? "Primary"
+            : "Secondary",
       },
     ],
     meta: {

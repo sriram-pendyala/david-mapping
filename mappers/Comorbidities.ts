@@ -2,6 +2,7 @@ import { Condition } from "fhir/r4";
 import * as uuid from "uuid";
 
 export function generateCamorbidities(
+  codes: any,
   comorbidities: {
     trg_source_system_name: string;
     trg_row_ice_id: string;
@@ -43,17 +44,17 @@ export function generateCamorbidities(
           display: comorbidities.comorbidity_name,
         },
       ],
+      text:
+        codes[comorbidities.comorbidity_code.replace(/\./g, "")] ||
+        comorbidities.comorbidity_name,
     },
     category: [
       {
-        text: comorbidities.comorbidity_class_name,
-        coding: [
-          {
-            system: comorbidities.comorbidity_class_system || "N/A",
-            code: comorbidities.comorbidity_class_code || "N/A",
-            display: comorbidities.comorbidity_class_name,
-          },
-        ],
+        text:
+          Number(comorbidities.comorbidity_class_code) &&
+          Number(comorbidities.comorbidity_class_code) === 1
+            ? "Primary"
+            : "Secondary",
       },
     ],
     clinicalStatus: {
