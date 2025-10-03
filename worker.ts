@@ -16,6 +16,10 @@ import { generateProcedure } from "./mappers/Procedure";
 import { generatePatientVitals } from "./mappers/Vitals";
 import { generatePatientMolecularSequencing } from "./mappers/MolecularSequencing";
 import { generatePatientRadioTherapies } from "./mappers/RadioTherapies";
+import { DocumentMapper } from "./constants";
+import path from "path";
+import mime from "mime-types";
+import { generateDocumentReferences } from "./mappers/DocumentReferences";
 
 async function processFile() {
   const { filepath, filename, icdCodes } = workerData;
@@ -25,7 +29,7 @@ async function processFile() {
     const content = await fs.readFile(filepath, "utf8");
 
     // Process the file based on its type
-    const result = processJsonFile(content, filename, icdCodes);
+    const result = await processJsonFile(content, filename, icdCodes);
 
     // Send result back to main thread
     parentPort?.postMessage({
@@ -44,7 +48,11 @@ async function processFile() {
   }
 }
 
-function processJsonFile(content: string, filename: string, codes: any[]) {
+async function processJsonFile(
+  content: string,
+  filename: string,
+  codes: any[]
+) {
   console.log("Processing JSON file:", filename);
   const data = JSON.parse(content);
   // Add your JSON processing logic here
@@ -425,6 +433,118 @@ function processJsonFile(content: string, filename: string, codes: any[]) {
     bundle.entry?.push(...molecularSequencings);
   }
 
+  // Get the document ref filenames
+  const docName = filename.replace(".json", "") as string;
+  if (docName) {
+    const documentsContainerFolderName =
+      DocumentMapper[docName as keyof typeof DocumentMapper];
+
+    // get each file from document-attachments folder -> documentsContainer -> files list
+    if (documentsContainerFolderName) {
+      const documentsPath = path.join(
+        process.cwd(),
+        "document-attachments",
+        documentsContainerFolderName
+      );
+
+      const files = await fs.readdir(documentsPath);
+
+      // Filter for actual files (not directories) and relevant file types
+      const fileStats = await Promise.all(
+        files.map(async (file) => {
+          const filePath = path.join(documentsPath, file);
+          const stat = await fs.stat(filePath);
+          return { file, filePath, isFile: stat.isFile() };
+        })
+      );
+
+      const validFiles = fileStats
+        .filter(({ isFile }) => isFile)
+        .map(({ file, filePath }) => ({ file, filePath }));
+
+      const documentProcessingResults = await Promise.allSettled(
+        validFiles.map(async ({ file, filePath }, index) => {
+          try {
+            console.log(`Processing document file: ${filePath}`);
+            // Read file as buffer for base64 conversion
+            const fileBuffer = await fs.readFile(filePath);
+
+            // Convert to base64
+            const base64Content = fileBuffer.toString("base64");
+
+            // Determine MIME type
+            const mimeType =
+              mime.lookup(filePath) || "application/octet-stream";
+
+            const [category, year, month, day, mrn, id, ...others] =
+              file.split("__")[1]?.split("-") || [];
+            const date = file.match(/(\d{4}-\d{2}-\d{2})/)?.[1] || null;
+
+            // if (index === 1) {
+            //   console.log(
+            //     "%%%%%",
+            //     file.split("__")[1]?.split("-"),
+            //     "$$$$",
+            //     file.match(/(\d{4}-\d{2}-\d{2})/)
+            //   );
+            //   console.log("^^^^^^", file, category, date, id);
+            // }
+
+            const parsedDate = date ? new Date(date).toISOString() : null;
+
+            const { documentReference: d, binary: b } =
+              generateDocumentReferences(patientUrl, {
+                category: decodeURIComponent(category) || "N/A",
+                date: parsedDate,
+                dId: id || "N/A",
+                mimeType,
+                base64Content,
+              });
+
+            if (bundle) {
+              bundle.entry?.push(
+                {
+                  fullUrl: `urn:uuid:${d.id}`,
+                  request: {
+                    method: "POST" as any,
+                    url: "DocumentReference",
+                  },
+                  resource: d,
+                },
+                {
+                  fullUrl: `urn:uuid:${b.id}`,
+                  request: {
+                    method: "POST" as any,
+                    url: "Binary",
+                  },
+                  resource: b,
+                }
+              );
+            }
+
+            return { success: true, file };
+          } catch (error) {
+            console.error(`Error processing file ${file}:`, error);
+            return { success: false, file };
+          }
+        })
+      );
+
+      const failedDocuments = documentProcessingResults
+        .filter((res) => res.status === "fulfilled" && !res.value.success)
+        .map((res) => (res as PromiseFulfilledResult<any>).value.file)
+        .join(",\n");
+
+      if (failedDocuments.length > 0)
+        console.log(
+          `Process failed ${failedDocuments} \n out of ${validFiles.length} documents for ${filename}`
+        );
+    }
+  }
+
+  console.log(
+    `Completed processing JSON file: ${filename}, entries: ${bundle.entry?.length}`
+  );
   return bundle;
 }
 processFile();
