@@ -23,20 +23,24 @@ export function generateDocumentReferences(
     //     text: d.category,
     //   },
     // ],
+    type: {
+      text: d.category,
+    },
     subject: {
       reference: patientUrl,
     },
-    identifier: [
-      {
-        system: "urn:ietf:rfc:3986",
-        value: d.dId || "N/A",
-      },
-    ],
+    ...(d.dId && {
+      identifier: [
+        {
+          value: d.dId,
+        },
+      ],
+    }),
     ...(d.date && { date: d.date }),
     content: [
       {
         attachment: {
-          contentType: d.mimeType || "",
+          ...(d.mimeType && { contentType: d.mimeType || "" }),
           url: `Binary/${binaryId}`,
           title: d.category || "",
           ...(d.date && { creation: d.date }),

@@ -473,12 +473,12 @@ async function processJsonFile(
             const base64Content = fileBuffer.toString("base64");
 
             // Determine MIME type
-            const mimeType =
-              mime.lookup(filePath) || "application/octet-stream";
+            const mimeType = mime.lookup(filePath) || "";
 
             const [category, year, month, day, mrn, id, ...others] =
               file.split("__")[1]?.split("-") || [];
             const date = file.match(/(\d{4}-\d{2}-\d{2})/)?.[1] || null;
+            const recordId = file.split("__")[0];
 
             // if (index === 1) {
             //   console.log(
@@ -496,7 +496,7 @@ async function processJsonFile(
               generateDocumentReferences(patientUrl, {
                 category: decodeURIComponent(category) || "N/A",
                 date: parsedDate,
-                dId: id || "N/A",
+                dId: recordId || "",
                 mimeType,
                 base64Content,
               });
