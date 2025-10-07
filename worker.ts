@@ -542,6 +542,54 @@ async function processJsonFile(
     }
   }
 
+  const notesData = (data.notes || []).map(
+    (note: { mrn: string; name: string; dateTime: string; notes: string }) => {
+      if (note) {
+        // Convert notes text to base64
+        const base64Content = Buffer.from(note.notes, "utf8").toString(
+          "base64"
+        );
+
+        const date = note.dateTime
+          ? new Date(note.dateTime).toISOString()
+          : null;
+
+        // Create DocumentReference and Binary for the notes
+        const { documentReference, binary } = generateDocumentReferences(
+          patientUrl,
+          {
+            category: note.name,
+            date,
+            dId: `notes-${note.mrn}`,
+            mimeType: "text/plain",
+            base64Content,
+          }
+        );
+
+        if (bundle) {
+          bundle.entry?.push(
+            {
+              fullUrl: `urn:uuid:${documentReference.id}`,
+              request: {
+                method: "POST" as any,
+                url: "DocumentReference",
+              },
+              resource: documentReference,
+            },
+            {
+              fullUrl: `urn:uuid:${binary.id}`,
+              request: {
+                method: "POST" as any,
+                url: "Binary",
+              },
+              resource: binary,
+            }
+          );
+        }
+      }
+    }
+  );
+
   console.log(
     `Completed processing JSON file: ${filename}, entries: ${bundle.entry?.length}`
   );
