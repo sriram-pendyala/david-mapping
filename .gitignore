@@ -4,3 +4,4 @@ data/*
 example-data
 output/*
 document-attachments/*
+patient_encounters_results.json

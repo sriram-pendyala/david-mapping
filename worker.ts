@@ -20,24 +20,41 @@ import { DocumentMapper } from "./constants";
 import path from "path";
 import mime from "mime-types";
 import { generateDocumentReferences } from "./mappers/DocumentReferences";
+import { isValid } from "date-fns";
 
 async function processFile() {
-  const { filepath, filename, icdCodes } = workerData;
+  const { filepath, filename, icdCodes, generateBundlesFromDocuments } =
+    workerData;
 
   try {
-    // Read the file
-    const content = await fs.readFile(filepath, "utf8");
+    if (generateBundlesFromDocuments) {
+      const result = await processJsonFile(
+        "",
+        filename,
+        icdCodes,
+        generateBundlesFromDocuments
+      );
+      parentPort?.postMessage({
+        filename,
+        result: result || null,
+        success: true,
+        error: null,
+      });
+    } else {
+      // Read the file
+      const content = await fs.readFile(filepath, "utf8");
 
-    // Process the file based on its type
-    const result = await processJsonFile(content, filename, icdCodes);
+      // Process the file based on its type
+      const result = await processJsonFile(content, filename, icdCodes);
 
-    // Send result back to main thread
-    parentPort?.postMessage({
-      filename,
-      result,
-      success: true,
-      error: null,
-    });
+      // Send result back to main thread
+      parentPort?.postMessage({
+        filename,
+        result: result || null,
+        success: true,
+        error: null,
+      });
+    }
   } catch (error) {
     console.error(`Error processing file ${filename}:`, error);
     parentPort?.postMessage({
@@ -51,13 +68,36 @@ async function processFile() {
 async function processJsonFile(
   content: string,
   filename: string,
-  codes: any[]
+  codes: any[],
+  generateBundlesFromDocuments?: boolean
 ) {
   console.log("Processing JSON file:", filename);
-  const data = JSON.parse(content);
+  const data = generateBundlesFromDocuments ? {} : JSON.parse(content);
+
   // Add your JSON processing logic here
-  const demographics =
+  let demographics =
     data.clinical_domain?.demographics?.at(0) || data.demographics?.at(0);
+
+  // if generateBundlesFromDocuments is true,
+  // read demographics from ./data/{filename}.json
+  if (generateBundlesFromDocuments) {
+    const dataDir = "./data";
+    const demographicsFilePath = path.join(dataDir, filename + ".json");
+    try {
+      const demographicsContent = await fs.readFile(
+        demographicsFilePath,
+        "utf8"
+      );
+      const demographicsData = JSON.parse(demographicsContent);
+      demographics =
+        demographicsData.clinical_domain?.demographics?.at(0) ||
+        demographicsData.demographics?.at(0);
+    } catch (error) {
+      console.error(`Error reading demographics for file ${filename}:`, error);
+      throw error;
+    }
+  }
+
   const patientId = data.patient_tempus_id || uuid.v4();
   let bundle: Bundle | null = null;
   if (!demographics) {
@@ -436,8 +476,10 @@ async function processJsonFile(
   // Get the document ref filenames
   const docName = filename.replace(".json", "") as string;
   if (docName) {
-    const documentsContainerFolderName =
-      DocumentMapper[docName as keyof typeof DocumentMapper];
+    const documentsContainerFolderName = docName;
+    // uncomment below if the ids for json files in data are
+    // different from folder name in document-attachments, make use of DocumentMapper from constants.ts then
+    // DocumentMapper[docName as keyof typeof DocumentMapper];
 
     // get each file from document-attachments folder -> documentsContainer -> files list
     if (documentsContainerFolderName) {
@@ -446,6 +488,18 @@ async function processJsonFile(
         "document-attachments",
         documentsContainerFolderName
       );
+
+      if (generateBundlesFromDocuments) {
+        try {
+          await fs.access(documentsPath);
+        } catch (err) {
+          console.log(
+            `Folder not found: ${documentsPath}, skipping document processing.`
+          );
+          // Skip document processing if folder does not exist
+          return;
+        }
+      }
 
       const files = await fs.readdir(documentsPath);
 
@@ -473,24 +527,15 @@ async function processJsonFile(
             const base64Content = fileBuffer.toString("base64");
 
             // Determine MIME type
-            const mimeType = mime.lookup(filePath) || "";
+            const mimeType = mime.lookup(filePath) || "html";
 
             const [category, year, month, day, mrn, id, ...others] =
-              file.split("__")[1]?.split("-") || [];
+              file.split("_")[1]?.split("-") || [];
             const date = file.match(/(\d{4}-\d{2}-\d{2})/)?.[1] || null;
-            const recordId = file.split("__")[0];
+            const recordId = file.split("_")[0];
 
-            // if (index === 1) {
-            //   console.log(
-            //     "%%%%%",
-            //     file.split("__")[1]?.split("-"),
-            //     "$$$$",
-            //     file.match(/(\d{4}-\d{2}-\d{2})/)
-            //   );
-            //   console.log("^^^^^^", file, category, date, id);
-            // }
-
-            const parsedDate = date ? new Date(date).toISOString() : null;
+            const parsedDate =
+              date && isValid(date) ? new Date(date).toISOString() : null;
 
             const { documentReference: d, binary: b } =
               generateDocumentReferences(patientUrl, {

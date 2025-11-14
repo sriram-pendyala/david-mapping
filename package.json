@@ -14,6 +14,7 @@
   "dependencies": {
     "@types/fhir": "^0.0.41",
     "clipboardy": "^4.0.0",
+    "date-fns": "^4.1.0",
     "fhir": "^4.12.0",
     "jszip": "^3.10.1",
     "mime-types": "^3.0.1",
