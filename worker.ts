@@ -527,7 +527,7 @@ async function processJsonFile(
             const base64Content = fileBuffer.toString("base64");
 
             // Determine MIME type
-            const mimeType = mime.lookup(filePath) || "html";
+            const mimeType = mime.lookup(filePath) || "text/html";
 
             const [category, year, month, day, mrn, id, ...others] =
               file.split("_")[1]?.split("-") || [];

@@ -93,7 +93,9 @@ export function generatePatient(demographics: {
         postalCode: demographics.postal_code,
       },
     ],
-    birthDate: demographics.date_of_birth_string,
+    ...(demographics.date_of_birth_string && {
+      birthDate: demographics.date_of_birth_string,
+    }),
     ...(demographics.date_of_death_string && {
       deceasedDateTime: demographics.date_of_death_string,
     }),
