@@ -2,6 +2,7 @@ import { loadCodes } from "./load_codes.js";
 import { Worker } from "worker_threads";
 import fs from "fs/promises";
 import path from "path";
+import { createWriteStream } from "fs";
 
 const generateBundlesFromDocuments = true;
 const hasAllPatientDemographicsInSingleJSON = true;
@@ -89,6 +90,12 @@ async function generatePatientBundlesFromDocuments() {
   const files = await fs.readdir(dataDir);
   const dataFiles = files.filter((file) => !file.includes("."));
 
+  // create a json object with status like { filename: false }
+  const fileStatus = dataFiles.reduce((acc, filename) => {
+    acc[filename] = false;
+    return acc;
+  }, {} as Record<string, boolean>);
+
   console.log("Generating patient bundles from documents...");
   if (hasAllPatientDemographicsInSingleJSON) {
     const jsonFilePath = "./patient_encounters_results.json";
@@ -135,23 +142,28 @@ async function generatePatientBundlesFromDocuments() {
       const outputDir = "./output";
       await fs.mkdir(outputDir, { recursive: true });
 
+      console.log(
+        "Writing output files...",
+        results.map((r: any) => ({
+          fileName: r.filename,
+        }))
+      );
       for (const { filename, result } of results as any[]) {
         if (result.result === null) {
           console.log(`No result for file: ${filename}, skipping write.`);
           continue;
         }
-        console.log("%%%%%", JSON.stringify(result).substring(0, 200));
+        console.log("Writing output for file:", filename);
         const outputFilePath = path.join(
           outputDir,
           `${path.parse(filename).name}-bundle.json`
         );
-        await fs.writeFile(
-          outputFilePath,
-          JSON.stringify(result.result, null, 2),
-          "utf8"
-        );
+        await writeJSONStreamChunked(outputFilePath, result.result);
+        fileStatus[filename] = true;
         console.log(`Written bundle to ${outputFilePath}`);
       }
+
+      console.log("File processing status:", fileStatus);
     } catch (error) {
       console.error("Error processing files:", error);
     }
@@ -204,6 +216,51 @@ async function loadDemographicsFromJSON(jsonFilePath: string): Promise<void> {
   } catch (err) {
     console.error("Error processing JSON:", err);
   }
+}
+
+async function writeJSONStreamChunked(
+  filePath: string,
+  data: any
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const stream = createWriteStream(filePath);
+
+    stream.on("error", reject);
+    stream.on("finish", resolve);
+
+    // Write in smaller chunks
+    const writeChunk = (obj: any, indent = 0) => {
+      const indentStr = " ".repeat(indent);
+
+      if (Array.isArray(obj)) {
+        stream.write("[\n");
+        obj.forEach((item, index) => {
+          if (index > 0) stream.write(",\n");
+          stream.write(indentStr + "  ");
+          writeChunk(item, indent + 2);
+        });
+        stream.write(`\n${indentStr}]`);
+      } else if (obj && typeof obj === "object") {
+        stream.write("{\n");
+        const keys = Object.keys(obj);
+        keys.forEach((key, index) => {
+          if (index > 0) stream.write(",\n");
+          stream.write(`${indentStr}  "${key}": `);
+          writeChunk(obj[key], indent + 2);
+        });
+        stream.write(`\n${indentStr}}`);
+      } else {
+        try {
+          stream.write(JSON.stringify(obj));
+        } catch (err) {
+          stream.write('"[VALUE_TOO_LARGE]"');
+        }
+      }
+    };
+
+    writeChunk(data);
+    stream.end();
+  });
 }
 
 if (generateBundlesFromDocuments) {
