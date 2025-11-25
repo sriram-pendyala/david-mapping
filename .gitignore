@@ -5,3 +5,5 @@ example-data
 output/*
 document-attachments/*
 patient_encounters_results.json
+.DS_store
+.vscode/

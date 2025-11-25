@@ -87,12 +87,17 @@ export function generatePatient(demographics: {
         },
       },
     ],
-    address: [
-      {
-        state: demographics.state,
-        postalCode: demographics.postal_code,
-      },
-    ],
+    ...((demographics.state || demographics.postal_code) && {
+      address: [
+        {
+          state: demographics.state || '',
+          postalCode: demographics.postal_code || '',
+        },
+      ],
+    }),
+    ...(demographics.gender_name && {
+      gender: demographics.gender_name as "male" | "female" | "other" | "unknown" | undefined,
+    }),
     ...(demographics.date_of_birth_string && {
       birthDate: demographics.date_of_birth_string,
     }),
