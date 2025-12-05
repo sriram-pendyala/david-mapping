@@ -20,7 +20,7 @@ import { DocumentMapper } from "./constants";
 import path from "path";
 import mime from "mime-types";
 import { generateDocumentReferences } from "./mappers/DocumentReferences";
-import { isValid } from "date-fns";
+import { isValid, parseISO } from "date-fns";
 
 async function processFile() {
   const { filepath, filename, icdCodes, generateBundlesFromDocuments } =
@@ -535,8 +535,9 @@ async function processJsonFile(
               const date = file.match(/(\d{4}-\d{2}-\d{2})/)?.[1] || null;
               const recordId = file.split("_")[0];
 
+              const dateObj = parseISO(date || "");
               const parsedDate =
-                date && isValid(date) ? new Date(date).toISOString() : null;
+                date && isValid(dateObj) ? new Date(date).toISOString() : null;
 
               const { documentReference: d, binary: b } =
                 generateDocumentReferences(patientUrl, {
@@ -590,7 +591,13 @@ async function processJsonFile(
   }
 
   const notesData = (data.notes || []).map(
-    (note: { mrn: string; name: string; dateTime: string; notes: string }) => {
+    (note: {
+      mrn: string;
+      name: string;
+      dateTime: string;
+      notes: string;
+      noteId: string;
+    }) => {
       if (note) {
         // Convert notes text to base64
         const base64Content = Buffer.from(note.notes, "utf8").toString(
@@ -607,7 +614,7 @@ async function processJsonFile(
           {
             category: note.name,
             date,
-            dId: `notes-${note.mrn}`,
+            dId: `notes-${note.mrn}${note.noteId ? `-${note.noteId}` : ""}`,
             mimeType: "text/plain",
             base64Content,
           }
