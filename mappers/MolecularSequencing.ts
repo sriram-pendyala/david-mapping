@@ -100,7 +100,9 @@ export function generatePatientMolecularSequencing(
     ...(details.sequencing_value_quantity && {
       valueQuantity: {
         value: parseFloat(details.sequencing_value_quantity),
-        comparator: (details.quantity_comparator as any) || undefined,
+        ...(details.quantity_comparator && {
+          comparator: (details.quantity_comparator as any) || undefined,
+        }),
         unit: details.sequencing_unit_name || "N/A",
         system: details.sequencing_unit_system || "N/A",
         code: details.sequencing_unit_code || "N/A",

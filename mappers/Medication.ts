@@ -86,16 +86,23 @@ export function generatePatientMedications(
                     frequency:
                       Number(details.dosage_timing_repeat_count) || undefined,
                   }),
-                boundsPeriod: {
-                  start: details.medication_start_date_string
-                    ? new Date(
-                        details.medication_start_date_string
-                      ).toISOString()
-                    : undefined,
-                  end: details.medication_end_date_string
-                    ? new Date(details.medication_end_date_string).toISOString()
-                    : undefined,
-                },
+                ...((details.medication_start_date_string ||
+                  details.medication_end_date_string) && {
+                  boundsPeriod: {
+                    ...(details.medication_start_date_string && {
+                      start: details.medication_start_date_string
+                        ? new Date(
+                            details.medication_start_date_string
+                          ).toISOString()
+                        : undefined,
+                    }),
+                    ...(details.medication_end_date_string && {
+                      end: new Date(
+                        details.medication_end_date_string
+                      ).toISOString(),
+                    }),
+                  },
+                }),
               },
             },
           }),

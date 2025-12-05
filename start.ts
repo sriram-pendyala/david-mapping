@@ -4,8 +4,8 @@ import fs from "fs/promises";
 import path from "path";
 import { createWriteStream } from "fs";
 
-const generateBundlesFromDocuments = true;
-const hasAllPatientDemographicsInSingleJSON = true;
+const generateBundlesFromDocuments = false;
+const hasAllPatientDemographicsInSingleJSON = false;
 
 async function generatePatientBundlesFromMetadata() {
   const codes = await loadCodes();
@@ -60,24 +60,28 @@ async function generatePatientBundlesFromMetadata() {
       const outputDir = "./output";
       await fs.mkdir(outputDir, { recursive: true });
 
+      console.log(
+        "Writing output files...",
+        results.map((r: any) => ({
+          fileName: r.filename,
+        }))
+      );
       for (const { filename, result } of results as any[]) {
         if (result.result === null) {
           console.log(`No result for file: ${filename}, skipping write.`);
           continue;
         }
-        console.log("%%%%%", JSON.stringify(result).substring(0, 200));
+        console.log("Writing output for file:", filename);
         const outputFilePath = path.join(
           outputDir,
           `${path.parse(filename).name}-bundle.json`
         );
-        await fs.writeFile(
-          outputFilePath,
-          JSON.stringify(result, null, 2),
-          "utf8"
-        );
+        await writeJSONStreamChunked(outputFilePath, result.result);
+
         console.log(`Written bundle to ${outputFilePath}`);
       }
-      return results;
+
+      console.log("File processing status:");
     } catch (error) {
       console.error("Error processing files:", error);
     }

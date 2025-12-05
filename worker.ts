@@ -473,117 +473,119 @@ async function processJsonFile(
     bundle.entry?.push(...molecularSequencings);
   }
 
-  // Get the document ref filenames
-  const docName = filename.replace(".json", "") as string;
-  if (docName) {
-    const documentsContainerFolderName = docName;
-    // uncomment below if the ids for json files in data are
-    // different from folder name in document-attachments, make use of DocumentMapper from constants.ts then
-    // DocumentMapper[docName as keyof typeof DocumentMapper];
+  if (generateBundlesFromDocuments) {
+    // Get the document ref filenames
+    const docName = filename.replace(".json", "") as string;
+    if (docName) {
+      const documentsContainerFolderName = docName;
+      // uncomment below if the ids for json files in data are
+      // different from folder name in document-attachments, make use of DocumentMapper from constants.ts then
+      // DocumentMapper[docName as keyof typeof DocumentMapper];
 
-    // get each file from document-attachments folder -> documentsContainer -> files list
-    if (documentsContainerFolderName) {
-      const documentsPath = path.join(
-        process.cwd(),
-        "document-attachments",
-        documentsContainerFolderName
-      );
-
-      if (generateBundlesFromDocuments) {
-        try {
-          await fs.access(documentsPath);
-        } catch (err) {
-          console.log(
-            `Folder not found: ${documentsPath}, skipping document processing.`
-          );
-          // Skip document processing if folder does not exist
-          return;
-        }
-      }
-
-      const files = await fs.readdir(documentsPath);
-
-      // Filter for actual files (not directories) and relevant file types
-      const fileStats = await Promise.all(
-        files.map(async (file) => {
-          const filePath = path.join(documentsPath, file);
-          const stat = await fs.stat(filePath);
-          return { file, filePath, isFile: stat.isFile() };
-        })
-      );
-
-      const validFiles = fileStats
-        .filter(({ isFile }) => isFile)
-        .map(({ file, filePath }) => ({ file, filePath }));
-
-      const documentProcessingResults = await Promise.allSettled(
-        validFiles.map(async ({ file, filePath }, index) => {
-          try {
-            console.log(`Processing document file: ${filePath}`);
-            // Read file as buffer for base64 conversion
-            const fileBuffer = await fs.readFile(filePath);
-
-            // Convert to base64
-            const base64Content = fileBuffer.toString("base64");
-
-            // Determine MIME type
-            const mimeType = mime.lookup(filePath) || "text/html";
-
-            const [category, year, month, day, mrn, id, ...others] =
-              file.split("_")[1]?.split("-") || [];
-            const date = file.match(/(\d{4}-\d{2}-\d{2})/)?.[1] || null;
-            const recordId = file.split("_")[0];
-
-            const parsedDate =
-              date && isValid(date) ? new Date(date).toISOString() : null;
-
-            const { documentReference: d, binary: b } =
-              generateDocumentReferences(patientUrl, {
-                category: decodeURIComponent(category) || "N/A",
-                date: parsedDate,
-                dId: recordId || "",
-                mimeType,
-                base64Content,
-              });
-
-            if (bundle) {
-              bundle.entry?.push(
-                {
-                  fullUrl: `urn:uuid:${d.id}`,
-                  request: {
-                    method: "POST" as any,
-                    url: "DocumentReference",
-                  },
-                  resource: d,
-                },
-                {
-                  fullUrl: `urn:uuid:${b.id}`,
-                  request: {
-                    method: "POST" as any,
-                    url: "Binary",
-                  },
-                  resource: b,
-                }
-              );
-            }
-
-            return { success: true, file };
-          } catch (error) {
-            console.error(`Error processing file ${file}:`, error);
-            return { success: false, file };
-          }
-        })
-      );
-
-      const failedDocuments = documentProcessingResults
-        .filter((res) => res.status === "fulfilled" && !res.value.success)
-        .map((res) => (res as PromiseFulfilledResult<any>).value.file)
-        .join(",\n");
-
-      if (failedDocuments.length > 0)
-        console.log(
-          `Process failed ${failedDocuments} \n out of ${validFiles.length} documents for ${filename}`
+      // get each file from document-attachments folder -> documentsContainer -> files list
+      if (documentsContainerFolderName) {
+        const documentsPath = path.join(
+          process.cwd(),
+          "document-attachments",
+          documentsContainerFolderName
         );
+
+        if (generateBundlesFromDocuments) {
+          try {
+            await fs.access(documentsPath);
+          } catch (err) {
+            console.log(
+              `Folder not found: ${documentsPath}, skipping document processing.`
+            );
+            // Skip document processing if folder does not exist
+            return;
+          }
+        }
+
+        const files = await fs.readdir(documentsPath);
+
+        // Filter for actual files (not directories) and relevant file types
+        const fileStats = await Promise.all(
+          files.map(async (file) => {
+            const filePath = path.join(documentsPath, file);
+            const stat = await fs.stat(filePath);
+            return { file, filePath, isFile: stat.isFile() };
+          })
+        );
+
+        const validFiles = fileStats
+          .filter(({ isFile }) => isFile)
+          .map(({ file, filePath }) => ({ file, filePath }));
+
+        const documentProcessingResults = await Promise.allSettled(
+          validFiles.map(async ({ file, filePath }, index) => {
+            try {
+              console.log(`Processing document file: ${filePath}`);
+              // Read file as buffer for base64 conversion
+              const fileBuffer = await fs.readFile(filePath);
+
+              // Convert to base64
+              const base64Content = fileBuffer.toString("base64");
+
+              // Determine MIME type
+              const mimeType = mime.lookup(filePath) || "text/html";
+
+              const [category, year, month, day, mrn, id, ...others] =
+                file.split("_")[1]?.split("-") || [];
+              const date = file.match(/(\d{4}-\d{2}-\d{2})/)?.[1] || null;
+              const recordId = file.split("_")[0];
+
+              const parsedDate =
+                date && isValid(date) ? new Date(date).toISOString() : null;
+
+              const { documentReference: d, binary: b } =
+                generateDocumentReferences(patientUrl, {
+                  category: decodeURIComponent(category) || "N/A",
+                  date: parsedDate,
+                  dId: recordId || "",
+                  mimeType,
+                  base64Content,
+                });
+
+              if (bundle) {
+                bundle.entry?.push(
+                  {
+                    fullUrl: `urn:uuid:${d.id}`,
+                    request: {
+                      method: "POST" as any,
+                      url: "DocumentReference",
+                    },
+                    resource: d,
+                  },
+                  {
+                    fullUrl: `urn:uuid:${b.id}`,
+                    request: {
+                      method: "POST" as any,
+                      url: "Binary",
+                    },
+                    resource: b,
+                  }
+                );
+              }
+
+              return { success: true, file };
+            } catch (error) {
+              console.error(`Error processing file ${file}:`, error);
+              return { success: false, file };
+            }
+          })
+        );
+
+        const failedDocuments = documentProcessingResults
+          .filter((res) => res.status === "fulfilled" && !res.value.success)
+          .map((res) => (res as PromiseFulfilledResult<any>).value.file)
+          .join(",\n");
+
+        if (failedDocuments.length > 0)
+          console.log(
+            `Process failed ${failedDocuments} \n out of ${validFiles.length} documents for ${filename}`
+          );
+      }
     }
   }
 

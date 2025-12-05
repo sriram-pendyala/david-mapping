@@ -98,25 +98,29 @@ export function generatePatientRadioTherapies(
         start: details.radiotherapy_start_date_string
           ? new Date(details.radiotherapy_start_date_string).toISOString()
           : undefined,
-        end: details.radiotherapy_end_date_string
-          ? new Date(details.radiotherapy_end_date_string).toISOString()
-          : undefined,
+        ...(details.radiotherapy_end_date_string && {
+          end: details.radiotherapy_end_date_string
+            ? new Date(details.radiotherapy_end_date_string).toISOString()
+            : undefined,
+        }),
       },
     }),
-    bodySite: details.body_site_code
-      ? [
-          {
-            coding: [
-              {
-                system: details.body_site_system || "N/A",
-                code: details.body_site_code || "N/A",
-                display: details.body_site_name || "N/A",
-              },
-            ],
-            text: details.body_site_name || "N/A",
-          },
-        ]
-      : undefined,
+    ...(details.body_site_code && {
+      bodySite: details.body_site_code
+        ? [
+            {
+              coding: [
+                {
+                  system: details.body_site_system || "N/A",
+                  code: details.body_site_code || "N/A",
+                  display: details.body_site_name || "N/A",
+                },
+              ],
+              text: details.body_site_name || "N/A",
+            },
+          ]
+        : undefined,
+    }),
     extension: [
       {
         url: "http://hl7.org/fhir/us/mcode/StructureDefinition/mcode-radiotherapy-dose-delivered-to-volume",

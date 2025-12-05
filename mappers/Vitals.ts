@@ -63,14 +63,16 @@ export function generatePatientVitals(
     subject: {
       reference: patientUrl,
     },
-    valueQuantity: {
-      value: details.vitals_value_quantity
-        ? parseFloat(details.vitals_value_quantity)
-        : undefined,
-      unit: details.quantity_unit_name || "N/A",
-      system: details.quantity_unit_system || "N/A",
-      code: details.quantity_unit_code || "N/A",
-    },
+    ...(details.vitals_value_quantity && {
+      valueQuantity: {
+        value: details.vitals_value_quantity
+          ? parseFloat(details.vitals_value_quantity)
+          : undefined,
+        unit: details.quantity_unit_name || "N/A",
+        system: details.quantity_unit_system || "N/A",
+        code: details.quantity_unit_code || "N/A",
+      },
+    }),
     meta: {
       tag: [
         {
